@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class VowerSelector : MonoBehaviour {
+public class ConsonantSelector : MonoBehaviour {
 
 	float eulerTemp;
 	int currentState, prevState;
@@ -17,8 +17,8 @@ public class VowerSelector : MonoBehaviour {
 	TextMesh enteredText;
 
 	void Start () {
-		vowels = GameObject.Find ("Vowel").GetComponentsInChildren<TextMesh> ();
-		hand = GameObject.Find ("Vowel Hand Parent");
+		vowels = GameObject.Find ("Consonant").GetComponentsInChildren<TextMesh> ();
+		hand = GameObject.Find ("Consonant Hand Parent");
 		enteredText = GameObject.Find ("Entered Text").GetComponent<TextMesh> ();
 		enteredText.text = "";
 
@@ -45,19 +45,11 @@ public class VowerSelector : MonoBehaviour {
 			currentState = 0;
 		}
 
-		//母音パネルの色を変える
+		//子音パネルの色を変える
 		vowels [currentState].color = new Color (255, 0, 0);
 		if (currentState != prevState) {
-			OVRHaptics.RightChannel.Mix (hapticsClip);
+			OVRHaptics.LeftChannel.Mix (hapticsClip);
 			vowels [prevState].color = new Color (255, 255, 255);
-		}
-
-		//入力する
-		if (OVRInput.GetDown (OVRInput.Button.One)) {
-			enteredText.text += vowels [currentState].text;
-			if (enteredText.text.Length > 16) {
-				enteredText.text = enteredText.text.Remove (0, 1);
-			}
 		}
 
 		//ステート管理
