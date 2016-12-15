@@ -1,3 +1,0 @@
-﻿・ConsonantSelector で子音を保持する変数を public にして作る
-・TextManager で子音と送られて来た母音の組み合わせからテキストをに変更
-・やゆよ、わをんへの例外対応
