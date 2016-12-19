@@ -1,4 +1,7 @@
 # VR-Text-Input
+
+![概要.gif](https://qiita-image-store.s3.amazonaws.com/0/138197/f263e585-5032-ab2d-1f2a-38352b54ea97.gif)
+
 VR Text Input Method for Japanese.
 
 VR とハンドコントローラー向けの日本語入力実験です。
@@ -14,5 +17,5 @@ VR とハンドコントローラー向けの日本語入力実験です。
 
 ## 予定
 
-- Vive Controller 対応
+- Vive Controller 対応（Vive を買ったら）
 - IME への接続

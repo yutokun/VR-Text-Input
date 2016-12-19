@@ -4,8 +4,8 @@ using System.Collections;
 public class JapaneseInputHandler : MonoBehaviour {
 
 	//hand は針
-	[SerializeField] GameObject handParent, consonantObj, vowelObj, controller, upperVarObj, lowerVerObj;
-	TextMesh[] consonants, vowels, upperVars, lowerVars;
+	[SerializeField] GameObject handParent, selectorObj, controller, upperVarObj, lowerVerObj;
+	TextMesh[] selectors, upperVars, lowerVars;
 
 	//Touch の振動強度・長さ調整
 	//[Header ("Length and Strength of Oculus Touch")]
@@ -48,7 +48,7 @@ public class JapaneseInputHandler : MonoBehaviour {
 		{ "", "", "", "", "" },
 		{ "ゃ", "「", "ゅ", "」", "ょ" },
 		{ "", "", "", "", "" },
-		{ "ゎ", "", "、", "", "。" }
+		{ "ゎ", "", "？", "、", "。" }
 	};
 
 	string[,] jpCharsLowerVariation = new string[10, 5] {
@@ -72,8 +72,7 @@ public class JapaneseInputHandler : MonoBehaviour {
 	void Start () {
 		enteredText = GetComponent<TextMesh> ();
 		enteredText.text = "";
-		consonants = consonantObj.GetComponentsInChildren<TextMesh> ();
-		vowels = vowelObj.GetComponentsInChildren<TextMesh> ();
+		selectors = selectorObj.GetComponentsInChildren<TextMesh> ();
 		upperVars = upperVarObj.GetComponentsInChildren<TextMesh> ();
 		lowerVars = lowerVerObj.GetComponentsInChildren<TextMesh> ();
 
@@ -106,10 +105,21 @@ public class JapaneseInputHandler : MonoBehaviour {
 			currentPosition = 0;
 		}
 
-		FeedbackHaptics ();
+		//パネルの色を変えて振動させる
+		selectors [currentPosition].color = new Color (255, 0, 0);
+		if (currentPosition != prevPosition) {
+			OVRHaptics.RightChannel.Mix (hapticsClip);
+			selectors [prevPosition].color = new Color (255, 255, 255);
+		}
+
+		//ステート管理
+		prevPosition = currentPosition;
+		handRotation = handParent.transform.rotation;
+		handRotation.z = controller.transform.rotation.z;
+		handParent.transform.rotation = handRotation;
 
 		//入力処理
-		if (OVRInput.GetDown (OVRInput.RawButton.RIndexTrigger) || OVRInput.GetDown (OVRInput.RawButton.A)) {
+		if (OVRInput.GetDown (OVRInput.RawButton.RIndexTrigger)) {
 			//子音のセットを読んで入力文字を切り替え
 			consonantIndex = currentPosition;
 			if (consonantIsSecond) {
@@ -118,27 +128,31 @@ public class JapaneseInputHandler : MonoBehaviour {
 			}
 			//押下で子音に切り替え
 			for (int i = 0; i < 5; i++) {
-				vowels [i].text = jpChars [currentPosition, i];
+				selectors [i].text = jpChars [currentPosition, i];
 				//バリエーションを表示
 				upperVars [i].text = jpCharsUpperVariation [currentPosition, i];
 				lowerVars [i].text = jpCharsLowerVariation [currentPosition, i];
 			}
-			consonantObj.SetActive (false);
-			vowelObj.SetActive (true);
-		} else if (OVRInput.GetUp (OVRInput.RawButton.RIndexTrigger) || OVRInput.GetUp (OVRInput.RawButton.A)) {
+		} else if (OVRInput.GetUp (OVRInput.RawButton.RIndexTrigger)) {
 			//離して文字を入力
-			//EnterCharacter ();
 			if (variationEntered == false) {
-				enteredText.text += vowels [currentPosition].text;
+				enteredText.text += selectors [currentPosition].text;
 			}
-			consonantObj.SetActive (true);
-			vowelObj.SetActive (false);
 			variationEntered = false;
 
 			//バリエーションを非表示
 			for (int i = 0; i < 5; i++) {
 				upperVars [i].text = "";
 				lowerVars [i].text = "";
+			}
+
+			//子音に戻す
+			if (OVRInput.Get (OVRInput.RawButton.RHandTrigger)) {
+				for (int i = 0; i < 5; i++)
+					selectors [i].text = jpConsonantsChars [1, i];
+			} else {
+				for (int i = 0; i < 5; i++)
+					selectors [i].text = jpConsonantsChars [0, i];
 			}
 		} else if (OVRInput.GetDown (OVRInput.RawButton.B) && enteredText.text.Length != 0) {
 			//Bで最後の文字を削除
@@ -159,54 +173,16 @@ public class JapaneseInputHandler : MonoBehaviour {
 		}
 
 		//子音のセットを切り替え
-		if (OVRInput.GetUp (OVRInput.RawButton.RHandTrigger)) {
+		if (OVRInput.GetUp (OVRInput.RawButton.RHandTrigger) && !OVRInput.Get (OVRInput.RawButton.RIndexTrigger)) {
 			consonantIsSecond = false;
 			for (int i = 0; i < 5; i++) {
-				consonants [i].text = jpConsonantsChars [0, i];
+				selectors [i].text = jpConsonantsChars [0, i];
 			}
-		} else if (OVRInput.GetDown (OVRInput.RawButton.RHandTrigger)) {
+		} else if (OVRInput.GetDown (OVRInput.RawButton.RHandTrigger) && !OVRInput.Get (OVRInput.RawButton.RIndexTrigger)) {
 			consonantIsSecond = true;
 			for (int i = 0; i < 5; i++) {
-				consonants [i].text = jpConsonantsChars [1, i];
+				selectors [i].text = jpConsonantsChars [1, i];
 			}
 		}
 	}
-
-	/// <summary>
-	/// Oculus Touch の振動とパネルの変化によるフィードバックを行います。
-	/// 毎フレーム呼び出す必要があります。
-	/// ToDo:子音と母音の処理を1つにまとめる。
-	/// </summary>
-	void FeedbackHaptics () {
-		//子音パネルの色を変えて振動させる
-		consonants [currentPosition].color = new Color (255, 0, 0);
-		if (currentPosition != prevPosition) {
-			OVRHaptics.RightChannel.Mix (hapticsClip);
-			consonants [prevPosition].color = new Color (255, 255, 255);
-		}
-
-		//母音パネルの色を変えて振動させる
-		vowels [currentPosition].color = new Color (255, 0, 0);
-		if (currentPosition != prevPosition) {
-			vowels [prevPosition].color = new Color (255, 255, 255);
-		}
-
-		//ステート管理
-		prevPosition = currentPosition;
-		handRotation = handParent.transform.rotation;
-		handRotation.z = controller.transform.rotation.z;
-		handParent.transform.rotation = handRotation;
-	}
-
-	/// <summary>
-	/// 文字列を入力します。
-	/// </summary>
-	//	void EnterCharacter () {
-	//		enteredText.text += vowels [currentPosition].text;
-	//
-	//		//文字数が19以上の場合は最初の1文字を削除
-	//		if (enteredText.text.Length > 19) {
-	//			enteredText.text = enteredText.text.Remove (0, 1);
-	//		}
-	//	}
 }
