@@ -20,6 +20,9 @@ public class JapaneseInputHandler : MonoBehaviour {
 	int currentPosition, prevPosition;
 	Quaternion handRotation;
 
+	//テスト
+	[SerializeField] Animation testAnim;
+
 	//テキスト入力部分
 	bool consonantIsSecond = false, variationEntered;
 	int consonantIndex;
@@ -107,9 +110,12 @@ public class JapaneseInputHandler : MonoBehaviour {
 
 		//パネルの色を変えて振動させる
 		selectors [currentPosition].color = new Color (255, 0, 0);
+//		selectors [currentPosition].fontSize = 200;
 		if (currentPosition != prevPosition) {
 			OVRHaptics.RightChannel.Mix (hapticsClip);
 			selectors [prevPosition].color = new Color (255, 255, 255);
+//			selectors [prevPosition].fontSize = 150;
+			testAnim.Play ();
 		}
 
 		//ステート管理
