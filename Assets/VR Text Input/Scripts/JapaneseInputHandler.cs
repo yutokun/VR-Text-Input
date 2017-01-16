@@ -1,32 +1,26 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class JapaneseInputHandler : MonoBehaviour {
 
 	//hand は針
-	[SerializeField] GameObject handParent, selectorObj, controller, upperVarObj, lowerVerObj;
-	TextMesh[] selectors, upperVars, lowerVars;
+	[SerializeField] GameObject handParent, upperVariationParent, lowerVariationParent;
+	GameObject controller;
+	TextMesh[] selectorTexts, upperTexts, lowerTexts;
 
-	//Touch の振動強度・長さ調整
-	//[Header ("Length and Strength of Oculus Touch")]
-	[Header ("Touch の振動する長さと強度を調整")]
-	[SerializeField, Tooltip ("It vibrates 320 times per second.")] int hapticsLength = 4;
-	[SerializeField, Range (0, 255)] byte hapticsStrength = 128;
-	byte[] hapticsBytes;
+	//振動データ
 	OVRHapticsClip hapticsClip;
 
-	//針の状態を管理
-	float eulerTemp;
-	int currentPosition, prevPosition;
-	Quaternion handRotation;
-
-	//テスト
-	[SerializeField] Animation testAnim;
+	//針の位置
+	int currentHandPosition, prevPosition;
 
 	//テキスト入力部分
-	bool consonantIsSecond = false, variationEntered;
+	bool afterVariationEntered;
 	int consonantIndex;
-	TextMesh enteredText;
+
+	TextHandler receiver;
+	KanjiConverter kanji;
 
 	string[,] jpChars = new string[10, 5] {
 		{ "あ", "い", "う", "え", "お" },
@@ -41,7 +35,7 @@ public class JapaneseInputHandler : MonoBehaviour {
 		{ "わ", "ー", "を", "～", "ん" }
 	};
 
-	string[,] jpCharsUpperVariation = new string[10, 5] {
+	string[,] upperVariations = new string[10, 5] {
 		{ "ぁ", "ぃ", "ぅ", "ぇ", "ぉ" },
 		{ "が", "ぎ", "ぐ", "げ", "ご" },
 		{ "ざ", "じ", "ず", "ぜ", "ぞ" },
@@ -51,11 +45,11 @@ public class JapaneseInputHandler : MonoBehaviour {
 		{ "", "", "", "", "" },
 		{ "ゃ", "「", "ゅ", "」", "ょ" },
 		{ "", "", "", "", "" },
-		{ "ゎ", "", "？", "、", "。" }
+		{ "ゎ", "！", "？", "、", "。" }
 	};
 
-	string[,] jpCharsLowerVariation = new string[10, 5] {
-		{ "", "", "", "", "" },
+	string[,] lowerVariations = new string[10, 5] {
+		{ "", "", "ゔ", "", "" },
 		{ "", "", "", "", "" },
 		{ "", "", "", "", "" },
 		{ "", "", "っ", "", "" },
@@ -64,131 +58,148 @@ public class JapaneseInputHandler : MonoBehaviour {
 		{ "", "", "", "", "" },
 		{ "", "【", "", "】", "" },
 		{ "", "", "", "", "" },
-		{ "", "", "", "", "" }
-	};
-
-	string[,] jpConsonantsChars = new string[2, 5] {
-		{ "あ", "か", "さ", "た", "な" },
-		{ "は", "ま", "や", "ら", "わ" }
+		{ "", "", "…", "/", "" }
 	};
 
 	void Start () {
-		enteredText = GetComponent<TextMesh> ();
-		enteredText.text = "";
-		selectors = selectorObj.GetComponentsInChildren<TextMesh> ();
-		upperVars = upperVarObj.GetComponentsInChildren<TextMesh> ();
-		lowerVars = lowerVerObj.GetComponentsInChildren<TextMesh> ();
+		//入力候補欄への参照を取得
+		controller = GameObject.Find ("RightHandAnchor");
+		selectorTexts = GameObject.Find ("Characters").GetComponentsInChildren<TextMesh> ();
+		upperTexts = upperVariationParent.GetComponentsInChildren<TextMesh> ();
+		lowerTexts = lowerVariationParent.GetComponentsInChildren<TextMesh> ();
+
+		receiver = FindObjectOfType<TextHandler> ();
+		kanji = FindObjectOfType<KanjiConverter> ();
 
 		//バリエーションを非表示
-		for (int i = 0; i < 5; i++) {
-			upperVars [i].text = "";
-			lowerVars [i].text = "";
-		}
+		DisableVariations ();
 
 		//振動用のデータを作成
-		hapticsBytes = new byte[hapticsLength];
+		byte[] hapticsBytes = new byte[4];
 		for (int i = 0; i < hapticsBytes.Length; i++) {
-			hapticsBytes [i] = hapticsStrength;
+			hapticsBytes [i] = 128;
 		}
 		hapticsClip = new OVRHapticsClip (hapticsBytes, hapticsBytes.Length);
 	}
 
 	void Update () {
 		//針の状態を判定
-		eulerTemp = controller.transform.rotation.eulerAngles.z;
+		float eulerTemp = controller.transform.rotation.eulerAngles.z;
+//		float eulerTemp = controller.transform.localRotation.z;
 		if (300 < eulerTemp && eulerTemp <= 324) {
-			currentPosition = 4;
+			currentHandPosition = 4;
 		} else if (324 < eulerTemp && eulerTemp <= 348) {
-			currentPosition = 3;
-		} else if (348 < eulerTemp && eulerTemp <= 360 || 0 < eulerTemp && eulerTemp <= 12) {
-			currentPosition = 2;
-		} else if (12 < eulerTemp && eulerTemp <= 36) {
-			currentPosition = 1;
-		} else if (36 < eulerTemp && eulerTemp <= 60) {
-			currentPosition = 0;
+			currentHandPosition = 3;
+		} else if (348 < eulerTemp || eulerTemp <= 12) {
+			currentHandPosition = 2;
+		} else if (eulerTemp <= 36) {
+			currentHandPosition = 1;
+		} else if (eulerTemp <= 60) {
+			currentHandPosition = 0;
 		}
 
 		//パネルの色を変えて振動させる
-		selectors [currentPosition].color = new Color (255, 0, 0);
-//		selectors [currentPosition].fontSize = 200;
-		if (currentPosition != prevPosition) {
+		if (kanji.isConverting == false && currentHandPosition != prevPosition) {
 			OVRHaptics.RightChannel.Mix (hapticsClip);
-			selectors [prevPosition].color = new Color (255, 255, 255);
-//			selectors [prevPosition].fontSize = 150;
-			testAnim.Play ();
+			selectorTexts [prevPosition].color = new Color (255, 255, 255);
+			selectorTexts [currentHandPosition].color = new Color (255, 0, 0);
 		}
 
-		//ステート管理
-		prevPosition = currentPosition;
+		//針の位置管理
+		Quaternion handRotation;
+		prevPosition = currentHandPosition;
 		handRotation = handParent.transform.rotation;
 		handRotation.z = controller.transform.rotation.z;
 		handParent.transform.rotation = handRotation;
 
+		//主に可読性のためにOVRInput系をキャッシュ
+		bool RIndexDown = OVRInput.GetDown (OVRInput.RawButton.RIndexTrigger);
+		bool RIndexHold = OVRInput.Get (OVRInput.RawButton.RIndexTrigger);
+		bool RIndexUp = OVRInput.GetUp (OVRInput.RawButton.RIndexTrigger);
+		bool RHandDown = OVRInput.GetDown (OVRInput.RawButton.RHandTrigger);
+		bool RHandHold = OVRInput.Get (OVRInput.RawButton.RHandTrigger);
+		bool RHandUp = OVRInput.GetUp (OVRInput.RawButton.RHandTrigger);
+		bool RThumbstickUp_Down = OVRInput.GetDown (OVRInput.RawButton.RThumbstickUp);
+		bool RThumbstickDown_Down = OVRInput.GetDown (OVRInput.RawButton.RThumbstickDown);
+
 		//入力処理
-		if (OVRInput.GetDown (OVRInput.RawButton.RIndexTrigger)) {
+		if (RIndexDown) {
 			//子音のセットを読んで入力文字を切り替え
-			consonantIndex = currentPosition;
-			if (consonantIsSecond) {
-				currentPosition += 5;
+			consonantIndex = currentHandPosition;
+
+			//右中指を押している場合ははまやらわの母音セットに切り替え
+			if (RHandHold) {
+				currentHandPosition += 5;
 				consonantIndex += 5;
 			}
-			//押下で子音に切り替え
+
+			//押下で母音リストに切り替え
 			for (int i = 0; i < 5; i++) {
-				selectors [i].text = jpChars [currentPosition, i];
-				//バリエーションを表示
-				upperVars [i].text = jpCharsUpperVariation [currentPosition, i];
-				lowerVars [i].text = jpCharsLowerVariation [currentPosition, i];
+				selectorTexts [i].text = jpChars [currentHandPosition, i];
 			}
-		} else if (OVRInput.GetUp (OVRInput.RawButton.RIndexTrigger)) {
+
+			//バリエーションを表示
+			EnableVariation (currentHandPosition);
+
+		} else if (RIndexUp) {
 			//離して文字を入力
-			if (variationEntered == false) {
-				enteredText.text += selectors [currentPosition].text;
+			if (afterVariationEntered == false) {
+				receiver.temporary.text += selectorTexts [currentHandPosition].text;
 			}
-			variationEntered = false;
+			afterVariationEntered = false;
 
 			//バリエーションを非表示
-			for (int i = 0; i < 5; i++) {
-				upperVars [i].text = "";
-				lowerVars [i].text = "";
-			}
+			DisableVariations ();
 
 			//子音に戻す
-			if (OVRInput.Get (OVRInput.RawButton.RHandTrigger)) {
+			if (RHandHold) {
 				for (int i = 0; i < 5; i++)
-					selectors [i].text = jpConsonantsChars [1, i];
+					selectorTexts [i].text = jpChars [i + 5, 0];
 			} else {
 				for (int i = 0; i < 5; i++)
-					selectors [i].text = jpConsonantsChars [0, i];
+					selectorTexts [i].text = jpChars [i, 0];
 			}
-		} else if (OVRInput.GetDown (OVRInput.RawButton.B) && enteredText.text.Length != 0) {
-			//Bで最後の文字を削除
-			enteredText.text = enteredText.text.Remove (enteredText.text.Length - 1, 1);
-		} else if (OVRInput.GetDown (OVRInput.RawButton.RThumbstickUp)) {
-			//上部バリエーションの入力
-			enteredText.text += jpCharsUpperVariation [consonantIndex, currentPosition];
-			variationEntered = true;
-		} else if (OVRInput.GetDown (OVRInput.RawButton.RThumbstickDown)) {
-			//下部バリエーションの入力
-			enteredText.text += jpCharsLowerVariation [consonantIndex, currentPosition];
-			variationEntered = true;
 		}
 
-		//文字数が19以上の場合は最初の1文字を削除
-		if (enteredText.text.Length > 19) {
-			enteredText.text = enteredText.text.Remove (0, 1);
+		//右人差し指が押されており、
+		if (RIndexHold) {
+			//かつ右親指が上下されたときにバリエーション入力
+			if (RThumbstickUp_Down) {
+				//上部バリエーションの入力
+				receiver.temporary.text += upperVariations [consonantIndex, currentHandPosition];
+				afterVariationEntered = true;
+			} else if (RThumbstickDown_Down) {
+				//下部バリエーションの入力
+				receiver.temporary.text += lowerVariations [consonantIndex, currentHandPosition];
+				afterVariationEntered = true;
+			}
 		}
 
-		//子音のセットを切り替え
-		if (OVRInput.GetUp (OVRInput.RawButton.RHandTrigger) && !OVRInput.Get (OVRInput.RawButton.RIndexTrigger)) {
-			consonantIsSecond = false;
+		//中指で子音のセットを切り替え
+		if (RHandUp && !RIndexHold) {
 			for (int i = 0; i < 5; i++) {
-				selectors [i].text = jpConsonantsChars [0, i];
+				selectorTexts [i].text = jpChars [i, 0];
 			}
-		} else if (OVRInput.GetDown (OVRInput.RawButton.RHandTrigger) && !OVRInput.Get (OVRInput.RawButton.RIndexTrigger)) {
-			consonantIsSecond = true;
+		} else if (RHandDown && !RIndexHold) {
 			for (int i = 0; i < 5; i++) {
-				selectors [i].text = jpConsonantsChars [1, i];
+				selectorTexts [i].text = jpChars [i + 5, 0];
 			}
+		}
+	}
+
+	//バリエーションを表示
+	public void EnableVariation (int currentPosition) {
+		for (int i = 0; i < 5; i++) {
+			upperTexts [i].text = upperVariations [currentPosition, i];
+			lowerTexts [i].text = lowerVariations [currentPosition, i];
+		}
+	}
+
+	//バリエーションを非表示
+	void DisableVariations () {
+		for (int i = 0; i < 5; i++) {
+			upperTexts [i].text = "";
+			lowerTexts [i].text = "";
 		}
 	}
 }

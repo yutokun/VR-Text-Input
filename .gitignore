@@ -40,6 +40,7 @@ VRTextInput_Data/
 VRTextInput.exe
 *.unitypackage
 VRTextInput.zip
+Assets/JSON/
 
 *.log #log files, for some plugins
 *.pyc #python bytecode cache, for some plugins.
