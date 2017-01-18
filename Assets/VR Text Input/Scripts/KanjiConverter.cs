@@ -90,6 +90,7 @@ public class KanjiConverter : MonoBehaviour {
 //			Debug.Log ("変換文節の数：" + j.list.Count);
 //			Debug.Log ("候補の数：" + j.list [0].list [1].keys.Count);
 //			Debug.Log ("変化前の文字数" + j.list [0].list [0].ToString ().Length);
+			int numberOfCandidate = j.list [0].list [1].keys.Count;
 
 			//Aボタンの挙動を変更
 			isConverting = true;
@@ -99,12 +100,20 @@ public class KanjiConverter : MonoBehaviour {
 				item.color = new Color (255, 255, 255);
 			}
 
+			//TODO: yield return 後にループを2回処理してしまう問題に対する修正。綺麗に直したい。
+			bool oneTime = false;
+
 			for (int phrase = 0; phrase < j.list.Count; phrase++) {
-				for (int i = 0; i < kanji.Count; i++) {
+				for (int i = 0; i < numberOfCandidate; i++) {
 					kanji [i].text = j.list [phrase].list [1].keys [i]; //変換候補をKanjiに表示
 				}
 				yield return new WaitUntil (() => OVRInput.GetDown (OVRInput.RawButton.A));
-				textHandler.Send (j.list [phrase].list [1].keys [current], j.list [phrase].list [0].ToString ().Length - 2); //選んだ候補を入力
+				if (oneTime == false) {
+					textHandler.Send (j.list [phrase].list [1].keys [current], j.list [phrase].list [0].ToString ().Length - 2); //選んだ候補を入力
+					oneTime = true;
+				} else {
+					oneTime = false;
+				}
 			}
 			foreach (var item in kanji)
 				item.text = "";
