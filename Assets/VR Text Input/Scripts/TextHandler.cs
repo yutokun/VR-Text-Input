@@ -44,6 +44,8 @@ public class TextHandler : MonoBehaviour {
 	/// <param name="str">送信する文字</param>
 	/// <param name="deleteCount">一時入力エリアから削除する文字数</param>
 	public void Send (string str, int deleteCount) {
+		if (temporary.text.Length < deleteCount)
+			deleteCount = temporary.text.Length;
 		temporary.text = temporary.text.Remove (0, deleteCount);
 		foreach (var item in gameObjects) {
 			item.SendMessage ("OnJPInput", str, SendMessageOptions.DontRequireReceiver);
