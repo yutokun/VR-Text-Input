@@ -15,7 +15,8 @@ public class TextInputSample : MonoBehaviour {
 
 	//後ろの文字を消去します。仮。デリゲートでコールバックに変更する予定。
 	void OnBackspace () {
-		textMesh.text = textMesh.text.Remove (textMesh.text.Length - 1, 1);
+		if (textMesh.text.Length != 0)
+			textMesh.text = textMesh.text.Remove (textMesh.text.Length - 1, 1);
 	}
 
 	void Update () {

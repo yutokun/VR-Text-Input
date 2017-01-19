@@ -80,7 +80,6 @@ public class KanjiConverter : MonoBehaviour {
 			//返ってくるJSONが配列[]のみで処理できないため変換
 			string result = www.downloadHandler.text.Replace ("[", "{");
 			result = result.Replace ("]", "}");
-			Debug.Log ("JSON: " + result);
 
 			//JSONをプログラムから扱える形式に変換
 			JSONObject j = new JSONObject (result);

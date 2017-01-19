@@ -19,6 +19,8 @@ public class JapaneseInputHandler : MonoBehaviour {
 	bool afterVariationEntered;
 	int consonantIndex;
 
+	public Color baseColor = new Color (255, 255, 255), highlightColor = new Color (255, 0, 0);
+
 	TextHandler receiver;
 	KanjiConverter kanji;
 
@@ -101,8 +103,8 @@ public class JapaneseInputHandler : MonoBehaviour {
 		//パネルの色を変えて振動させる
 		if (kanji.isConverting == false && currentHandPosition != prevPosition) {
 			OVRHaptics.RightChannel.Mix (hapticsClip);
-			selectorTexts [prevPosition].color = new Color (255, 255, 255);
-			selectorTexts [currentHandPosition].color = new Color (255, 0, 0);
+			selectorTexts [prevPosition].color = baseColor;
+			selectorTexts [currentHandPosition].color = highlightColor;
 		}
 
 		//針の位置管理
