@@ -1,6 +1,6 @@
 # VR-Text-Input
 
-![概要.gif](https://qiita-image-store.s3.amazonaws.com/0/138197/f263e585-5032-ab2d-1f2a-38352b54ea97.gif)
+![概要.gif](http://yutokun.com/vr/jpinput/1-overview.gif)
 
 VR Text Input Method for Japanese.
 
