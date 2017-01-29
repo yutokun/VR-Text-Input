@@ -21,7 +21,7 @@ public class JapaneseInputHandler : MonoBehaviour {
 
 	public Color baseColor = new Color (255, 255, 255), highlightColor = new Color (255, 0, 0);
 
-	TextHandler receiver;
+	TextHandler textHandler;
 	KanjiConverter kanji;
 
 	string[,] jpChars = new string[10, 5] {
@@ -70,7 +70,7 @@ public class JapaneseInputHandler : MonoBehaviour {
 		upperTexts = upperVariationParent.GetComponentsInChildren<TextMesh> ();
 		lowerTexts = lowerVariationParent.GetComponentsInChildren<TextMesh> ();
 
-		receiver = FindObjectOfType<TextHandler> ();
+		textHandler = FindObjectOfType<TextHandler> ();
 		kanji = FindObjectOfType<KanjiConverter> ();
 
 		//バリエーションを非表示
@@ -146,7 +146,9 @@ public class JapaneseInputHandler : MonoBehaviour {
 		} else if (RIndexUp) {
 			//離して文字を入力
 			if (afterVariationEntered == false) {
-				receiver.temporary.text += selectorTexts [currentHandPosition].text;
+				if (textHandler.kanjiConversion == true)
+					textHandler.temporary.text += selectorTexts [currentHandPosition].text;
+				textHandler.SendChar (selectorTexts [currentHandPosition].text);
 			}
 			afterVariationEntered = false;
 
@@ -168,11 +170,15 @@ public class JapaneseInputHandler : MonoBehaviour {
 			//かつ右親指が上下されたときにバリエーション入力
 			if (RThumbstickUp_Down) {
 				//上部バリエーションの入力
-				receiver.temporary.text += upperVariations [consonantIndex, currentHandPosition];
+				if (textHandler.kanjiConversion == true)
+					textHandler.temporary.text += upperVariations [consonantIndex, currentHandPosition];
+				textHandler.SendChar (upperVariations [consonantIndex, currentHandPosition]);
 				afterVariationEntered = true;
 			} else if (RThumbstickDown_Down) {
 				//下部バリエーションの入力
-				receiver.temporary.text += lowerVariations [consonantIndex, currentHandPosition];
+				if (textHandler.kanjiConversion == true)
+					textHandler.temporary.text += lowerVariations [consonantIndex, currentHandPosition];
+				textHandler.SendChar (lowerVariations [consonantIndex, currentHandPosition]);
 				afterVariationEntered = true;
 			}
 		}

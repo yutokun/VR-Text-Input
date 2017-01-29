@@ -13,6 +13,13 @@ public class TextInputSample : MonoBehaviour {
 		textMesh.text += str;
 	}
 
+	//漢字変換前のひらがなを受け取るサンプルです。
+	//OnJPCharInput(string) は文字入力のたびにコールされ、
+	//入力した文字列を引数として取得できます。
+	void OnJPCharInput (string str) {
+		Debug.Log (str);
+	}
+
 	//後ろの文字を消去します。仮。デリゲートでコールバックに変更する予定。
 	void OnBackspace () {
 		if (textMesh.text.Length != 0)

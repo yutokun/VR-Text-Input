@@ -16,7 +16,10 @@ public class KanjiConverter : MonoBehaviour {
 		//テキスト入力欄への参照を取得
 		textMesh = GetComponent<TextMesh> ();
 
+		//漢字変換がオフなら変換エリアを非表示
 		textHandler = FindObjectOfType<TextHandler> ();
+		if (textHandler.kanjiConversion == false)
+			transform.parent.GetComponent<MeshRenderer> ().enabled = false;
 
 		//振動準備
 		controller = GameObject.Find ("RightHandAnchor");

@@ -6,9 +6,11 @@ public class TextHandler : MonoBehaviour {
 	//一時入力エリア
 	public TextMesh temporary;
 
-	[Header ("OnJPInput() の含まれる GameObject")]
+	[Header ("コールバックの含まれる GameObject")]
 	[Tooltip ("ここで指定した GameObject に含まれる OnJPInput() に対して文字列が送られます。")]
 	public GameObject[] gameObjects;
+
+	public bool kanjiConversion = true;
 
 	[Tooltip ("GameObject を自動検索します。\n！重要：文字列を確定する度にシーン上の全 GameObject に対して SendMessage を行うため、パフォーマンスが落ちる可能性があります。")]
 	public bool autoMode = false;
@@ -39,7 +41,7 @@ public class TextHandler : MonoBehaviour {
 	}
 
 	/// <summary>
-	/// Inspector で指定したGameObject の OnJPInput() にテキストを送信。
+	/// Inspector で指定したGameObject の OnJPInput() に変換済みテキストを送信。
 	/// </summary>
 	/// <param name="str">送信する文字</param>
 	/// <param name="deleteCount">一時入力エリアから削除する文字数</param>
@@ -49,6 +51,16 @@ public class TextHandler : MonoBehaviour {
 		temporary.text = temporary.text.Remove (0, deleteCount);
 		foreach (var item in gameObjects) {
 			item.SendMessage ("OnJPInput", str, SendMessageOptions.DontRequireReceiver);
+		}
+	}
+
+	/// <summary>
+	/// Inspector で指定したGameObject の OnJPCharInput() に変換前のひらがなを送信。
+	/// </summary>
+	/// <param name="str">String.</param>
+	public void SendChar (string str) {
+		foreach (var item in gameObjects) {
+			item.SendMessage ("OnJPCharInput", str, SendMessageOptions.DontRequireReceiver);
 		}
 	}
 }
