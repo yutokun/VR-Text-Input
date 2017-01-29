@@ -87,7 +87,6 @@ public class JapaneseInputHandler : MonoBehaviour {
 	void Update () {
 		//針の状態を判定
 		float eulerTemp = controller.transform.rotation.eulerAngles.z;
-//		float eulerTemp = controller.transform.localRotation.z;
 		if (300 < eulerTemp && eulerTemp <= 324) {
 			currentHandPosition = 4;
 		} else if (324 < eulerTemp && eulerTemp <= 348) {
@@ -115,22 +114,22 @@ public class JapaneseInputHandler : MonoBehaviour {
 		handParent.transform.rotation = handRotation;
 
 		//主に可読性のためにOVRInput系をキャッシュ
-		bool RIndexDown = OVRInput.GetDown (OVRInput.RawButton.RIndexTrigger);
-		bool RIndexHold = OVRInput.Get (OVRInput.RawButton.RIndexTrigger);
-		bool RIndexUp = OVRInput.GetUp (OVRInput.RawButton.RIndexTrigger);
-		bool RHandDown = OVRInput.GetDown (OVRInput.RawButton.RHandTrigger);
-		bool RHandHold = OVRInput.Get (OVRInput.RawButton.RHandTrigger);
-		bool RHandUp = OVRInput.GetUp (OVRInput.RawButton.RHandTrigger);
+		bool RIndex_Down = OVRInput.GetDown (OVRInput.RawButton.RIndexTrigger);
+		bool RIndex_Hold = OVRInput.Get (OVRInput.RawButton.RIndexTrigger);
+		bool RIndex_Up = OVRInput.GetUp (OVRInput.RawButton.RIndexTrigger);
+		bool RHand_Down = OVRInput.GetDown (OVRInput.RawButton.RHandTrigger);
+		bool RHand_Hold = OVRInput.Get (OVRInput.RawButton.RHandTrigger);
+		bool RHand_Up = OVRInput.GetUp (OVRInput.RawButton.RHandTrigger);
 		bool RThumbstickUp_Down = OVRInput.GetDown (OVRInput.RawButton.RThumbstickUp);
 		bool RThumbstickDown_Down = OVRInput.GetDown (OVRInput.RawButton.RThumbstickDown);
 
 		//入力処理
-		if (RIndexDown) {
+		if (RIndex_Down) {
 			//子音のセットを読んで入力文字を切り替え
 			consonantIndex = currentHandPosition;
 
 			//右中指を押している場合ははまやらわの母音セットに切り替え
-			if (RHandHold) {
+			if (RHand_Hold) {
 				currentHandPosition += 5;
 				consonantIndex += 5;
 			}
@@ -143,7 +142,7 @@ public class JapaneseInputHandler : MonoBehaviour {
 			//バリエーションを表示
 			EnableVariation (currentHandPosition);
 
-		} else if (RIndexUp) {
+		} else if (RIndex_Up) {
 			//離して文字を入力
 			if (afterVariationEntered == false) {
 				if (textHandler.kanjiConversion == true)
@@ -156,7 +155,7 @@ public class JapaneseInputHandler : MonoBehaviour {
 			DisableVariations ();
 
 			//子音に戻す
-			if (RHandHold) {
+			if (RHand_Hold) {
 				for (int i = 0; i < 5; i++)
 					selectorTexts [i].text = jpChars [i + 5, 0];
 			} else {
@@ -166,7 +165,7 @@ public class JapaneseInputHandler : MonoBehaviour {
 		}
 
 		//右人差し指が押されており、
-		if (RIndexHold) {
+		if (RIndex_Hold) {
 			//かつ右親指が上下されたときにバリエーション入力
 			if (RThumbstickUp_Down) {
 				//上部バリエーションの入力
@@ -184,11 +183,11 @@ public class JapaneseInputHandler : MonoBehaviour {
 		}
 
 		//中指で子音のセットを切り替え
-		if (RHandUp && !RIndexHold) {
+		if (RHand_Up && !RIndex_Hold) {
 			for (int i = 0; i < 5; i++) {
 				selectorTexts [i].text = jpChars [i, 0];
 			}
-		} else if (RHandDown && !RIndexHold) {
+		} else if (RHand_Down && !RIndex_Hold) {
 			for (int i = 0; i < 5; i++) {
 				selectorTexts [i].text = jpChars [i + 5, 0];
 			}
