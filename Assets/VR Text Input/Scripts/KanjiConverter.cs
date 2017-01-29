@@ -44,7 +44,6 @@ public class KanjiConverter : MonoBehaviour {
 	}
 
 	int prev = 0, current = 0;
-	[SerializeField] float euler;
 	[HideInInspector] public bool isConverting = false;
 
 	void Update () {
@@ -53,17 +52,19 @@ public class KanjiConverter : MonoBehaviour {
 			StartCoroutine (Convert ());
 
 		//色と振動の処理
-		euler = controller.transform.rotation.x;
-		if (euler > -0.1f) {
-			current = 4;
-		} else if (euler > -0.2f) {
-			current = 3;
-		} else if (euler > -0.3f) {
-			current = 2;
-		} else if (euler > -0.4f) {
-			current = 1;
-		} else if (euler > -0.5f) {
+		float euler = controller.transform.eulerAngles.x;
+		if (euler < 300) {
+			current = current;
+		} else if (euler < 310) {
 			current = 0;
+		} else if (euler < 320) {
+			current = 1;
+		} else if (euler < 330) {
+			current = 2;
+		} else if (euler < 340) {
+			current = 3;
+		} else if (euler < 350) {
+			current = 4;
 		}
 		if (isConverting && prev != current) {
 			OVRHaptics.RightChannel.Mix (hapticsClip);
