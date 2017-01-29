@@ -107,11 +107,12 @@ public class JapaneseInputHandler : MonoBehaviour {
 		}
 
 		//針の位置管理
-		Quaternion handRotation;
 		prevPosition = currentHandPosition;
-		handRotation = handParent.transform.rotation;
-		handRotation.z = controller.transform.rotation.z;
-		handParent.transform.rotation = handRotation;
+
+		//針の回転管理
+		Vector3 handEulerAngles = handParent.transform.eulerAngles;
+		handEulerAngles.z = controller.transform.eulerAngles.z;
+		handParent.transform.eulerAngles = handEulerAngles;
 
 		//主に可読性のためにOVRInput系をキャッシュ
 		bool RIndex_Down = OVRInput.GetDown (OVRInput.RawButton.RIndexTrigger);
