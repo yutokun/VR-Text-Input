@@ -93,7 +93,6 @@ public class KanjiConverter : MonoBehaviour {
 //			Debug.Log ("変換文節の数：" + j.list.Count);
 //			Debug.Log ("候補の数：" + j.list [0].list [1].keys.Count);
 //			Debug.Log ("変化前の文字数" + j.list [0].list [0].ToString ().Length);
-			int numberOfCandidate = j.list [0].list [1].keys.Count;
 
 			//Aボタンの挙動を変更
 			isConverting = true;
@@ -104,10 +103,17 @@ public class KanjiConverter : MonoBehaviour {
 			}
 
 			for (int phrase = 0; phrase < j.list.Count; phrase++) {
+				foreach (var item in kanji) {
+					item.text = ""; //前回の変換結果が残ることがあるのでクリア
+				}
+				int numberOfCandidate = j.list [phrase].list [1].keys.Count; //変換候補の数
 				for (int i = 0; i < numberOfCandidate; i++) {
-					kanji [i].text = j.list [phrase].list [1].keys [i]; //変換候補をKanjiに表示
+					kanji [i].text = j.list [phrase].list [1].keys [i]; //変換候補をKanjiに並べる
 				}
 				yield return new WaitUntil (() => OVRInput.GetDown (OVRInput.RawButton.A));
+				if (current > numberOfCandidate) {
+					current = numberOfCandidate - 1;
+				}
 				textHandler.Send (j.list [phrase].list [1].keys [current], j.list [phrase].list [0].ToString ().Length - 2); //選んだ候補を入力
 				yield return null;
 			}
