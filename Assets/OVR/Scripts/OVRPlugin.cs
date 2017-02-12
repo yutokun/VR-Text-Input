@@ -26,7 +26,7 @@ using System.Runtime.InteropServices;
 
 internal static class OVRPlugin
 {
-	public static readonly System.Version wrapperVersion = OVRP_1_10_0.version;
+	public static readonly System.Version wrapperVersion = OVRP_1_11_0.version;
 
 	private static System.Version _version;
 	public static System.Version version
@@ -194,6 +194,13 @@ internal static class OVRPlugin
 		Unknown,
 	}
 
+	public enum EyeTextureFormat
+	{
+		Default = 0,
+		R16G16B16A16_FP = 2,
+		R11G11B10_FP = 3,
+	}
+	
 	public enum PlatformUI
 	{
 		None = -1,
@@ -227,6 +234,7 @@ internal static class OVRPlugin
 		Quad = 0,
 		Cylinder = 1,
 		Cubemap = 2,
+		OffcenterCubemap = 4,
 	}
 
 	private const int OverlayShapeFlagShift = 4;
@@ -239,8 +247,9 @@ internal static class OVRPlugin
 		// Using the 5-8 bits for shapes, total 16 potential shapes can be supported 0x000000[0]0 ->  0x000000[F]0
 		ShapeFlag_Quad      = unchecked((int)OverlayShape.Quad << OverlayShapeFlagShift),
 		ShapeFlag_Cylinder  = unchecked((int)OverlayShape.Cylinder << OverlayShapeFlagShift),
-		ShapeFlag_Cubemap   = unchecked((int)OverlayShape.Cubemap << OverlayShapeFlagShift),
-		ShapeFlagRangeMask  = unchecked((int)0xF << OverlayShapeFlagShift),
+		ShapeFlag_Cubemap = unchecked((int)OverlayShape.Cubemap << OverlayShapeFlagShift),
+		ShapeFlag_OffcenterCubemap = unchecked((int)OverlayShape.OffcenterCubemap << OverlayShapeFlagShift),
+		ShapeFlagRangeMask = unchecked((int)0xF << OverlayShapeFlagShift),
 	}
 
 	[StructLayout(LayoutKind.Sequential)]
@@ -681,6 +690,16 @@ internal static class OVRPlugin
 					return false;
 			}
 
+			if (shape == OverlayShape.OffcenterCubemap)
+			{
+#if UNITY_ANDROID
+				if (version >= OVRP_1_11_0.version)
+					flags |= (uint)(shape) << OverlayShapeFlagShift;
+				else
+#endif
+				return false;
+			}
+
 			return OVRP_1_6_0.ovrp_SetOverlayQuad3(flags, leftTexture, rightTexture, device, pose, scale, layerIndex) == Bool.True;
 		}
 
@@ -917,6 +936,36 @@ internal static class OVRPlugin
 		}
 	}
 
+	public static EyeTextureFormat GetDesiredEyeTextureFormat()
+	{
+		if (version >= OVRP_1_11_0.version )
+		{
+			uint eyeTextureFormatValue = (uint) OVRP_1_11_0.ovrp_GetDesiredEyeTextureFormat();
+		
+			// convert both R8G8B8A8 and R8G8B8A8_SRGB to R8G8B8A8 here for avoid confusing developers
+			if (eyeTextureFormatValue == 1)
+				eyeTextureFormatValue = 0;
+
+			return (EyeTextureFormat)eyeTextureFormatValue;
+		}
+		else
+		{
+			return EyeTextureFormat.Default;
+		}
+	}
+
+	public static bool SetDesiredEyeTextureFormat(EyeTextureFormat value)
+	{
+		if (version >= OVRP_1_11_0.version)
+		{
+			return OVRP_1_11_0.ovrp_SetDesiredEyeTextureFormat(value) == OVRPlugin.Bool.True;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
 	public static Vector3f GetBoundaryDimensions(BoundaryType boundaryType)
 	{
 		if (version >= OVRP_1_8_0.version)
@@ -1005,12 +1054,6 @@ internal static class OVRPlugin
 	public static bool RecenterTrackingOrigin(RecenterFlags flags)
 	{
 		return OVRP_1_0_0.ovrp_RecenterTrackingOrigin((uint)flags) == Bool.True;
-	}
-	
-	//HACK: This makes Unity think it always has VR focus while OVRPlugin.cs reports the correct value.
-	internal static bool ignoreVrFocus
-	{
-		set { OVRP_1_2_1.ovrp_SetAppIgnoreVrFocus(ToBool(value)); }
 	}
 
 	private const string pluginName = "OVRPlugin";
@@ -1228,14 +1271,6 @@ internal static class OVRPlugin
 		public static extern Bool ovrpi_SetTrackingCalibratedOrigin();
 	}
 
-	private static class OVRP_1_2_1
-	{
-		public static readonly System.Version version = new System.Version(1, 2, 1);
-
-		[DllImport(pluginName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern Bool ovrp_SetAppIgnoreVrFocus(Bool value);
-	}
-
 	private static class OVRP_1_3_0
 	{
 		public static readonly System.Version version = new System.Version(1, 3, 0);
@@ -1371,5 +1406,16 @@ internal static class OVRPlugin
 	private static class OVRP_1_10_0
 	{
 		public static readonly System.Version version = new System.Version(1, 10, 0);
+	}
+
+	private static class OVRP_1_11_0
+	{
+		public static readonly System.Version version = new System.Version(1, 11, 0);
+
+		[DllImport(pluginName, CallingConvention = CallingConvention.Cdecl)]
+		public static extern Bool ovrp_SetDesiredEyeTextureFormat(EyeTextureFormat value);
+
+		[DllImport(pluginName, CallingConvention = CallingConvention.Cdecl)]
+		public static extern EyeTextureFormat ovrp_GetDesiredEyeTextureFormat();
 	}
 }

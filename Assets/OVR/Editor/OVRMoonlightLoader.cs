@@ -34,7 +34,7 @@ class OVRMoonlightLoader
 	{
 		EnforceInputManagerBindings();
 		EditorApplication.update += EnforceBundleId;
-		EditorApplication.delayCall += EnforceVRSupport;
+		EditorApplication.update += EnforceVRSupport;
 
 		if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.Android)
 			return;
@@ -73,8 +73,11 @@ class OVRMoonlightLoader
 
 	static void EnforceVRSupport()
 	{
+		if (PlayerSettings.virtualRealitySupported)
+			return;
+		
 		var mgrs = GameObject.FindObjectsOfType<OVRManager> ().Where (m => m.isActiveAndEnabled);
-		if (mgrs.Count () != 0 && !PlayerSettings.virtualRealitySupported) {
+		if (mgrs.Count () != 0) {
 			Debug.Log ("Enabling Unity VR support");
 			PlayerSettings.virtualRealitySupported = true;
 		}

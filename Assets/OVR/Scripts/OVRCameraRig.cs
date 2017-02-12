@@ -77,6 +77,7 @@ public class OVRCameraRig : MonoBehaviour
 	/// If true, separate cameras will be used for the left and right eyes.
 	/// </summary>
 	public bool usePerEyeCameras = false;
+	private bool _skipUpdate = false;
 
 	private readonly string trackingSpaceName = "TrackingSpace";
 	private readonly string trackerAnchorName = "TrackerAnchor";
@@ -94,50 +95,40 @@ public class OVRCameraRig : MonoBehaviour
 #region Unity Messages
 	private void Awake()
 	{
+		_skipUpdate = true;
 		EnsureGameObjectIntegrity();
 	}
 
 	private void Start()
 	{
-		EnsureGameObjectIntegrity();
-
-		if (!Application.isPlaying)
-			return;
-
 		UpdateAnchors();
 	}
 
-	private void Update()
+	private void FixedUpdate()
 	{
-		EnsureGameObjectIntegrity();
-		
-		if (!Application.isPlaying)
-			return;
-
 		UpdateAnchors();
-
-#if UNITY_ANDROID && !UNITY_EDITOR
-
-        if (!correctedTrackingSpace)
-        {
-            //HACK: Unity 5.1.1p3 double-counts the head model on Android. Subtract it off in the reference frame.
-
-            var headModel = new Vector3(0f, OVRManager.profile.eyeHeight - OVRManager.profile.neckHeight, OVRManager.profile.eyeDepth);
-            var eyePos = -headModel + centerEyeAnchor.localRotation * headModel;
-
-            if ((eyePos - centerEyeAnchor.localPosition).magnitude > 0.01f)
-            {
-                trackingSpace.localPosition = trackingSpace.localPosition - 2f * (trackingSpace.localRotation * headModel);
-                correctedTrackingSpace = true;
-            }
-        }
-#endif
 	}
 
 #endregion
 
 	private void UpdateAnchors()
 	{
+		EnsureGameObjectIntegrity();
+
+		if (!Application.isPlaying)
+			return;
+		
+		if (_skipUpdate)
+		{
+			centerEyeAnchor.FromOVRPose(OVRPose.identity);
+			leftEyeAnchor.FromOVRPose(OVRPose.identity);
+			rightEyeAnchor.FromOVRPose(OVRPose.identity);
+
+			_skipUpdate = false;
+
+			return;
+		}
+
 		bool monoscopic = OVRManager.instance.monoscopic;
 
 		OVRPose tracker = OVRManager.tracker.GetPose();
@@ -226,6 +217,13 @@ public class OVRCameraRig : MonoBehaviour
 #endif
 		}
 
+		if (_centerEyeCamera.enabled == usePerEyeCameras ||
+		    _leftEyeCamera.enabled == !usePerEyeCameras ||
+		    _rightEyeCamera.enabled == !usePerEyeCameras)
+		{
+			_skipUpdate = true;
+		}
+		
 		_centerEyeCamera.enabled = !usePerEyeCameras;
 		_leftEyeCamera.enabled = usePerEyeCameras;
 		_rightEyeCamera.enabled = usePerEyeCameras;

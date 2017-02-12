@@ -25,7 +25,7 @@ using System.Threading;
 using VR = UnityEngine.VR;
 
 /// <summary>
-/// Contains information about the user's preferences and body dimensions.
+/// (Deprecated) Contains information about the user's preferences and body dimensions.
 /// </summary>
 public class OVRProfile : Object
 {
