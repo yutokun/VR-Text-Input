@@ -1,1 +1,1 @@
-・VR Text Input のみ Export。
+・VR Text Input と OvrAvatar/Content/Prefabs/LocalAvatar.prefab をエクスポート
