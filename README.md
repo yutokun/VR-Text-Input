@@ -7,7 +7,7 @@ VR Text Input Method for Japanese.
 VR とハンドコントローラー向けの日本語入力システムです。
 
 [ダウンロードはこちら](https://github.com/yutokun/VR-Text-Input/releases)
-※Unity 5.4.2p2 で作成しています。
+※Unity 5.5.1p2 で作成しています。
 
 ## 対応する機材
 
@@ -33,11 +33,19 @@ https://www.assetstore.unity3d.com/jp/#!/content/710
 
 ### 4. テキストの送り先を設定する
 
-この関数を使うと、漢字を確定するたびに string を得ることができます。
+この関数を使うと、漢字を確定する度に string を得ることができます。
 
 ```
 void OnJPInput (string str) {
 	Debug.Log(str); //例
+}
+```
+
+また、次の関数を使うと、1文字入力する度に平仮名の string を得ることができます。
+
+```
+void OnJPCharInput (string str) {
+Debug.Log(str); //例
 }
 ```
 
@@ -51,7 +59,7 @@ void OnBackspace() {
 }
 ```
 
-最後にとても重要な事ですが、上記関数を実装し、アタッチした GameObject をシーン中の JapaneseInputSystem にある Text Handler コンポーネントに設定して下さい。ここで指定した GameObject 内で `OnJPInput()` やらを探します。
+最後にとても重要な事ですが、上記関数の含まれる GameObject をシーン中の JapaneseInputSystem にある Text Handler コンポーネントに設定して下さい。ここで指定した GameObject 内で `OnJPInput()` やらを探します。
 
 Auto Mode も実装していますが、これは全 GameObject 走査するため、シーンの規模によってはフレーム落ちの原因となる可能性があります。お試し用と思って下さい。
 
@@ -62,8 +70,6 @@ Auto Mode も実装していますが、これは全 GameObject 走査するた�
 - OVRCameraRig はありますか？（Touchの操作に必要）
 - Oculus Avatar はなくても構いませんが、手が見えません（そりゃそうだ）
 - テキストの送り先は正しく設定されていますか？ 現在のところ、これがないと最初の変換を確定した時点でエラーとなります。
-- OvrAvatarSettings に、VR日本語入力デモの App ID を設定しています。ご自身のプロジェクトを上書きしないようにご注意下さい。
-- Oculus Avatar 周りのエラーが起きることがあるようです。究明中。
 
 ## 予定
 
