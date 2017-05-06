@@ -2,7 +2,7 @@
 using System.Collections;
 using UnityEngine.UI;
 
-public class JapaneseInputHandler : MonoBehaviour {
+public class JapaneseFanInputHandler : MonoBehaviour {
 
 	//hand は針
 	[SerializeField] GameObject handParent, upperVariationParent, lowerVariationParent;

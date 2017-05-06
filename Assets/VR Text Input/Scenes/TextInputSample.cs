@@ -17,7 +17,8 @@ public class TextInputSample : MonoBehaviour {
 	//OnJPCharInput(string) は文字入力のたびにコールされ、
 	//入力した文字列を引数として取得できます。
 	void OnJPCharInput (string str) {
-		Debug.Log (str);
+//		Debug.Log (str);
+		textMesh.text += str;
 	}
 
 	//後ろの文字を消去します。仮。デリゲートでコールバックに変更する予定。
