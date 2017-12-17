@@ -42,7 +42,7 @@ RenderSettings:
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 11
+  serializedVersion: 9
   m_GIWorkflowMode: 1
   m_GISettings:
     serializedVersion: 2
@@ -54,7 +54,7 @@ LightmapSettings:
     m_EnableBakedLightmaps: 0
     m_EnableRealtimeLightmaps: 0
   m_LightmapEditorSettings:
-    serializedVersion: 9
+    serializedVersion: 8
     m_Resolution: 2
     m_BakeResolution: 40
     m_TextureWidth: 1024
@@ -88,9 +88,8 @@ LightmapSettings:
     m_PVRFilteringAtrousPositionSigmaDirect: 0.5
     m_PVRFilteringAtrousPositionSigmaIndirect: 2
     m_PVRFilteringAtrousPositionSigmaAO: 1
-    m_ShowResolutionOverlay: 1
   m_LightingDataAsset: {fileID: 0}
-  m_UseShadowmask: 0
+  m_ShadowMaskMode: 2
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -110,8 +109,6 @@ NavMeshSettings:
     manualTileSize: 0
     tileSize: 256
     accuratePlacement: 0
-    debug:
-      m_Flags: 0
   m_NavMeshData: {fileID: 0}
 --- !u!1 &767466533
 GameObject:
@@ -154,31 +151,27 @@ MonoBehaviour:
   audioMinFallOffDistance: 1
   audioMaxFallOffDistance: 25
   soundGroupings:
-  - name: Test Group
+  - name: 546573742047726f7570
     soundList:
-    - name: TestSound1
+    - name: 54657374536f756e6431
       playback: 0
       volume: 1
       pitchVariance: {x: 0.95, y: 1.05}
       falloffDistance: {x: 1, y: 25}
       falloffCurve: 2
       volumeFalloffCurve:
-        serializedVersion: 2
         m_Curve:
-        - serializedVersion: 2
-          time: 0
+        - time: 0
           value: 1.0044228
           inSlope: -1.9459304
           outSlope: -1.9459304
           tangentMode: 0
-        - serializedVersion: 2
-          time: 0.27001944
+        - time: 0.27001944
           value: 0.24837627
           inSlope: -1.3226271
           outSlope: -1.3226271
           tangentMode: 0
-        - serializedVersion: 2
-          time: 0.99744946
+        - time: 0.99744946
           value: -0.0020017216
           inSlope: -0.42040923
           outSlope: -0.42040923
@@ -187,22 +180,18 @@ MonoBehaviour:
         m_PostInfinity: 2
         m_RotationOrder: 0
       reverbZoneMix:
-        serializedVersion: 2
         m_Curve:
-        - serializedVersion: 2
-          time: 0
+        - time: 0
           value: 1.0044228
           inSlope: -1.9459304
           outSlope: -1.9459304
           tangentMode: 0
-        - serializedVersion: 2
-          time: 0.36357749
+        - time: 0.36357749
           value: 0.4567863
           inSlope: -1.3226271
           outSlope: -1.3226271
           tangentMode: 0
-        - serializedVersion: 2
-          time: 0.99594045
+        - time: 0.99594045
           value: 0.19572063
           inSlope: -0.107312
           outSlope: -0.107312
@@ -220,29 +209,25 @@ MonoBehaviour:
         useFastOverride: 1
         gain: 0
         enableInvSquare: 1
-        volumetric: 0
         invSquareFalloff: {x: 1, y: 250}
       soundClips:
       - {fileID: 8300000, guid: 7000b4d67a1320940b363f3cf891dfff, type: 3}
       - {fileID: 8300000, guid: 8198ccc08475a764daaf226b841a55f1, type: 3}
       visibilityToggle: 0
-    - name: TestSound2
+    - name: 54657374536f756e6432
       playback: 0
       volume: 1
       pitchVariance: {x: 0.79999995, y: 1.25}
       falloffDistance: {x: 1, y: 25}
       falloffCurve: 1
       volumeFalloffCurve:
-        serializedVersion: 2
         m_Curve:
-        - serializedVersion: 2
-          time: 0
+        - time: 0
           value: 1
           inSlope: 0
           outSlope: 0
           tangentMode: 0
-        - serializedVersion: 2
-          time: 1
+        - time: 1
           value: 1
           inSlope: 0
           outSlope: 0
@@ -251,16 +236,13 @@ MonoBehaviour:
         m_PostInfinity: 2
         m_RotationOrder: 4
       reverbZoneMix:
-        serializedVersion: 2
         m_Curve:
-        - serializedVersion: 2
-          time: 0
+        - time: 0
           value: 1
           inSlope: 0
           outSlope: 0
           tangentMode: 0
-        - serializedVersion: 2
-          time: 1
+        - time: 1
           value: 1
           inSlope: 0
           outSlope: 0
@@ -278,7 +260,6 @@ MonoBehaviour:
         useFastOverride: 0
         gain: 0
         enableInvSquare: 0
-        volumetric: 0
         invSquareFalloff: {x: 1, y: 25}
       soundClips:
       - {fileID: 8300000, guid: 485ac48a563e2bf44bb4de7ead5a1f68, type: 3}
@@ -330,9 +311,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   testSound1:
-    soundFXName: TestSound1
+    soundFXName: 54657374536f756e6431
   testSound2:
-    soundFXName: TestSound2
+    soundFXName: 54657374536f756e6432
 --- !u!4 &1050355581
 Transform:
   m_ObjectHideFlags: 0
@@ -421,6 +402,7 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
+  m_StereoMirrorMode: 0
 --- !u!4 &2106254876
 Transform:
   m_ObjectHideFlags: 0

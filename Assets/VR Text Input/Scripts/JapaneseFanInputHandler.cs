@@ -1,12 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using UnityEngine.VR;
 
 public class JapaneseFanInputHandler : MonoBehaviour {
 
 	//hand は針
 	[SerializeField] GameObject handParent, upperVariationParent, lowerVariationParent;
-	GameObject controller;
 	TextMesh[] selectorTexts, upperTexts, lowerTexts;
 
 	//振動データ
@@ -65,7 +65,6 @@ public class JapaneseFanInputHandler : MonoBehaviour {
 
 	void Start () {
 		//入力候補欄への参照を取得
-		controller = GameObject.Find ("RightHandAnchor");
 		selectorTexts = GameObject.Find ("Characters").GetComponentsInChildren<TextMesh> ();
 		upperTexts = upperVariationParent.GetComponentsInChildren<TextMesh> ();
 		lowerTexts = lowerVariationParent.GetComponentsInChildren<TextMesh> ();
@@ -86,7 +85,7 @@ public class JapaneseFanInputHandler : MonoBehaviour {
 
 	void Update () {
 		//針の状態を判定
-		float eulerTemp = controller.transform.rotation.eulerAngles.z;
+		float eulerTemp = InputTracking.GetLocalRotation (VRNode.RightHand).eulerAngles.z;
 		if (300 < eulerTemp && eulerTemp <= 324) {
 			currentHandPosition = 4;
 		} else if (324 < eulerTemp && eulerTemp <= 348) {
@@ -111,7 +110,7 @@ public class JapaneseFanInputHandler : MonoBehaviour {
 
 		//針の回転管理
 		Vector3 handEulerAngles = handParent.transform.eulerAngles;
-		handEulerAngles.z = controller.transform.eulerAngles.z;
+		handEulerAngles.z = eulerTemp;
 		handParent.transform.eulerAngles = handEulerAngles;
 
 		//主に可読性のためにOVRInput系をキャッシュ

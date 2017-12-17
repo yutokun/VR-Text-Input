@@ -4,13 +4,14 @@
 
 VR Text Input Method for Japanese.
 
-VR とハンドコントローラー向けの日本語入力システムです。
+VR とハンドコントローラー向けの日本語入力システムです。  
 
 [ダウンロードはこちら](https://github.com/yutokun/VR-Text-Input/releases)
 
-## 対応する機材
+## 対応環境
 
 - Oculus Touch
+- Unity 5.6以上
 
 ## 実装方法
 
@@ -69,7 +70,7 @@ Auto Mode も実装していますが、これは全 GameObject 走査するた�
 - Vive Controller 対応（Vive を買ったら）
 - ~~IME への接続~~
 
-## License
+## Licenses
 
 MIT License
 
@@ -92,3 +93,6 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+**Oculus Integration**  
+Copyright © 2014-2017 Oculus VR, LLC. All rights reserved,
