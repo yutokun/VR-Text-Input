@@ -62,9 +62,10 @@ public class OVRGrabber : MonoBehaviour
     protected Vector3 m_anchorOffsetPosition;
     protected float m_prevFlex;
 	protected OVRGrabbable m_grabbedObj = null;
-    Vector3 m_grabbedObjectPosOff;
-    Quaternion m_grabbedObjectRotOff;
+    protected Vector3 m_grabbedObjectPosOff;
+    protected Quaternion m_grabbedObjectRotOff;
 	protected Dictionary<OVRGrabbable, int> m_grabCandidates = new Dictionary<OVRGrabbable, int>();
+	protected bool operatingWithoutOVRCameraRig = true;
 
     /// <summary>
     /// The currently grabbed object.
@@ -86,13 +87,25 @@ public class OVRGrabber : MonoBehaviour
         }
     }
 
-    void Awake()
+    protected virtual void Awake()
     {
         m_anchorOffsetPosition = transform.localPosition;
         m_anchorOffsetRotation = transform.localRotation;
+
+		// If we are being used with an OVRCameraRig, let it drive input updates, which may come from Update or FixedUpdate.
+
+		OVRCameraRig rig = null;
+		if (transform.parent != null && transform.parent.parent != null)
+			rig = transform.parent.parent.GetComponent<OVRCameraRig>();
+		
+		if (rig != null)
+		{
+			rig.UpdatedAnchors += (r) => {OnUpdatedAnchors();};
+			operatingWithoutOVRCameraRig = false;
+		}
     }
 
-    void Start()
+    protected virtual void Start()
     {
         m_lastPos = transform.position;
         m_lastRot = transform.rotation;
@@ -111,16 +124,16 @@ public class OVRGrabber : MonoBehaviour
         }
     }
 
+	void FixedUpdate()
+	{
+		if (operatingWithoutOVRCameraRig)
+			OnUpdatedAnchors();
+	}
+
     // Hands follow the touch anchors by calling MovePosition each frame to reach the anchor.
     // This is done instead of parenting to achieve workable physics. If you don't require physics on 
     // your hands or held objects, you may wish to switch to parenting.
-    //
-    // BUG: currently (Unity 5.5.0f3.), there's an unavoidable cosmetic issue with
-    // the hand. FixedUpdate must be used, or else physics behavior is wildly erratic.
-    // However, FixedUpdate cannot be guaranteed to run every frame, even when at 90Hz.
-    // On frames where FixedUpdate fails to run, the hand will fail to update its position, causing apparent
-    // judder. A fix is in progress, but not fixable on the user side at this time.
-    void FixedUpdate()
+    void OnUpdatedAnchors()
     {
         Vector3 handPos = OVRInput.GetLocalControllerPosition(m_controller);
         Quaternion handRot = OVRInput.GetLocalControllerRotation(m_controller);
@@ -198,7 +211,7 @@ public class OVRGrabber : MonoBehaviour
         }
     }
 
-    protected void GrabBegin()
+    protected virtual void GrabBegin()
     {
         float closestMagSq = float.MaxValue;
 		OVRGrabbable closestGrabbable = null;
@@ -287,7 +300,7 @@ public class OVRGrabber : MonoBehaviour
         }
     }
 
-    protected void MoveGrabbedObject(Vector3 pos, Quaternion rot, bool forceTeleport = false)
+    protected virtual void MoveGrabbedObject(Vector3 pos, Quaternion rot, bool forceTeleport = false)
     {
         if (m_grabbedObj == null)
         {
@@ -319,16 +332,8 @@ public class OVRGrabber : MonoBehaviour
             localPose = localPose * offsetPose;
 
 			OVRPose trackingSpace = transform.ToOVRPose() * localPose.Inverse();
-			OVRPose localVelocity = new OVRPose() { position = OVRInput.GetLocalControllerVelocity(m_controller), orientation = OVRInput.GetLocalControllerAngularVelocity(m_controller) };
-			Vector3 linearVelocity = trackingSpace.orientation * localVelocity.position;
-			Vector3 angularVelocity = (trackingSpace.orientation * localVelocity.orientation).eulerAngles * Mathf.Deg2Rad;
-
-			if (angularVelocity.x > Mathf.PI)
-				angularVelocity.x -= 2f * Mathf.PI;
-			if (angularVelocity.y > Mathf.PI)
-				angularVelocity.y -= 2f * Mathf.PI;
-			if (angularVelocity.z > Mathf.PI)
-				angularVelocity.z -= 2f * Mathf.PI;
+			Vector3 linearVelocity = trackingSpace.orientation * OVRInput.GetLocalControllerVelocity(m_controller);
+			Vector3 angularVelocity = trackingSpace.orientation * OVRInput.GetLocalControllerAngularVelocity(m_controller);
 
             GrabbableRelease(linearVelocity, angularVelocity);
         }
@@ -344,7 +349,7 @@ public class OVRGrabber : MonoBehaviour
         m_grabbedObj = null;
     }
 
-    protected void GrabVolumeEnable(bool enabled)
+    protected virtual void GrabVolumeEnable(bool enabled)
     {
         if (m_grabVolumeEnabled == enabled)
         {
@@ -364,7 +369,7 @@ public class OVRGrabber : MonoBehaviour
         }
     }
 
-	protected void OffhandGrabbed(OVRGrabbable grabbable)
+	protected virtual void OffhandGrabbed(OVRGrabbable grabbable)
     {
         if (m_grabbedObj == grabbable)
         {

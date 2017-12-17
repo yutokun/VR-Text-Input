@@ -11,6 +11,12 @@ public sealed class OvrAvatarSettings : ScriptableObject {
         set { Instance.ovrAppID = value; }
     }
 
+    public static string GearAppID
+    {
+        get { return Instance.ovrGearAppID; }
+        set { Instance.ovrGearAppID = value; }
+    }
+
     private static OvrAvatarSettings instance;
     public static OvrAvatarSettings Instance
     { 
@@ -53,4 +59,7 @@ public sealed class OvrAvatarSettings : ScriptableObject {
 
     [SerializeField]
     private string ovrAppID = "";
+
+    [SerializeField]
+    private string ovrGearAppID = "";
 }

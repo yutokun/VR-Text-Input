@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 public abstract class OvrAvatarDriver : MonoBehaviour {
 
@@ -56,5 +57,5 @@ public abstract class OvrAvatarDriver : MonoBehaviour {
         }
     };
 
-    public abstract bool GetCurrentPose(out PoseFrame pose);
+    public abstract void UpdateTransforms(IntPtr avatar);
 }

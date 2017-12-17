@@ -78,7 +78,7 @@ public class KanjiConverter : MonoBehaviour {
 		UnityWebRequest www = UnityWebRequest.Get ("http://www.google.com/transliterate?langpair=ja-Hira|ja&text=" + WWW.EscapeURL (textMesh.text));
 		yield return www.Send ();
 
-		if (www.isError) {
+		if (www.isNetworkError) {
 			Debug.Log (www.error);
 		} else {
 			//返ってくるJSONが配列[]のみで処理できないため変換

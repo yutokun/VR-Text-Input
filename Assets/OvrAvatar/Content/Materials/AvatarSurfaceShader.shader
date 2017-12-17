@@ -2,6 +2,7 @@
 	Properties{
 		// Global parameters
 		_Alpha("Alpha", Range(0.0, 1.0)) = 1.0
+		_DarkMultiplier("Dark Multiplier", Color) = (0.6, 0.6, 0.6, 1.0)
 		_BaseColor("Base Color", Color) = (0.0, 0.0, 0.0, 0.0)
 		_BaseMaskType("Base Mask Type", Int) = 0
 		_BaseMaskParameters("Base Mask Parameters", Vector) = (0, 0, 0, 0)
@@ -100,11 +101,14 @@
 		LOD 200
 		CGPROGRAM
 
+#pragma target 3.0
+#pragma only_renderers d3d11 gles3 gles
 #pragma surface surf Lambert vertex:vert nolightmap alpha noforwardadd
 #pragma multi_compile PROJECTOR_OFF PROJECTOR_ON
 #pragma multi_compile NORMAL_MAP_OFF NORMAL_MAP_ON
 #pragma multi_compile PARALLAX_OFF PARALLAX_ON
 #pragma multi_compile ROUGHNESS_OFF ROUGHNESS_ON
+#pragma multi_compile VERTALPHA_OFF VERTALPHA_ON
 #pragma multi_compile LAYERS_1 LAYERS_2 LAYERS_3 LAYERS_4 LAYERS_5 LAYERS_6 LAYERS_7 LAYERS_8
 
 #include "Assets/OvrAvatar/Content/Materials/AvatarMaterialStateShader.cginc"

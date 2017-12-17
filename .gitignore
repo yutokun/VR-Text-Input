@@ -41,6 +41,7 @@ VRTextInput.exe
 *.unitypackage
 VRTextInput.zip
 Assets/JSON/
+Assets/Plugins/RainbowFolders/
 
 *.log #log files, for some plugins
 *.pyc #python bytecode cache, for some plugins.

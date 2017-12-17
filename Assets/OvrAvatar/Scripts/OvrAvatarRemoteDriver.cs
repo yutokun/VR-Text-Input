@@ -2,82 +2,54 @@
 using System.Collections;
 using System;
 using System.Collections.Generic;
+using Oculus.Avatar;
 
 public class OvrAvatarRemoteDriver : OvrAvatarDriver
 {
-    bool isStreaming = false;
     Queue<OvrAvatarPacket> packetQueue = new Queue<OvrAvatarPacket>();
-    OvrAvatarPacket currentPacket = null;
-    OvrAvatarDriver.PoseFrame? currentPose;
-    float currentPacketTime = 0.0f;
 
-    int currentSequence = -1;
+    IntPtr CurrentSDKPacket = IntPtr.Zero;
+    float CurrentSDKPacketTime = 0f;
 
     const int MinPacketQueue = 1;
     const int MaxPacketQueue = 4;
 
-    void Update()
+    int CurrentSequence = -1;
+
+    public void QueuePacket(int sequence, OvrAvatarPacket packet)
     {
-        // If we're not currently streaming, check to see if we've buffered enough
-        if (!isStreaming && packetQueue.Count > MinPacketQueue)
+        if (sequence > CurrentSequence)
         {
-            currentPacket = packetQueue.Dequeue();
-            isStreaming = true;
+            CurrentSequence = sequence;
+            packetQueue.Enqueue(packet);
+        }
+    }
+
+    public override void UpdateTransforms(IntPtr sdkAvatar)
+    {
+        if (CurrentSDKPacket == IntPtr.Zero && packetQueue.Count >= MinPacketQueue)
+        {
+            CurrentSDKPacket = packetQueue.Dequeue().ovrNativePacket;
         }
 
-        // If we are streaming, update our pose
-        if (isStreaming)
+        if (CurrentSDKPacket != IntPtr.Zero)
         {
-            currentPacketTime += Time.deltaTime;
+            float PacketDuration = CAPI.ovrAvatarPacket_GetDurationSeconds(CurrentSDKPacket);
+            CAPI.ovrAvatar_UpdatePoseFromPacket(sdkAvatar, CurrentSDKPacket, Mathf.Min(PacketDuration, CurrentSDKPacketTime));
+            CurrentSDKPacketTime += Time.deltaTime;
 
-            // If we've elapsed past our current packet, advance
-            while (currentPacketTime > currentPacket.Duration)
+            if (CurrentSDKPacketTime > PacketDuration)
             {
+                CAPI.ovrAvatarPacket_Free(CurrentSDKPacket);
+                CurrentSDKPacket = IntPtr.Zero;
+                CurrentSDKPacketTime = CurrentSDKPacketTime - PacketDuration;
 
-                // If we're out of packets, stop streaming and
-                // lock to the final frame
-                if (packetQueue.Count == 0)
-                {
-                    currentPose = currentPacket.FinalFrame;
-                    currentPacketTime = 0.0f;
-                    currentPacket = null;
-                    isStreaming = false;
-                    return;
-                }
-
+                //Throw away packets deemed too old.
                 while (packetQueue.Count > MaxPacketQueue)
                 {
                     packetQueue.Dequeue();
                 }
-
-                // Otherwise, dequeue the next packet
-                currentPacketTime -= currentPacket.Duration;
-                currentPacket = packetQueue.Dequeue();
             }
-
-            // Compute the pose based on our current time offset in the packet
-            currentPose = currentPacket.GetPoseFrame(currentPacketTime);
         }
-    }
-
-    public void QueuePacket(int sequence, OvrAvatarPacket packet)
-    {
-        if (sequence - currentSequence < 0)
-        {
-            return;
-        }
-        currentSequence = sequence;
-        packetQueue.Enqueue(packet);
-    }
-
-    public override bool GetCurrentPose(out PoseFrame pose)
-    {
-        if (currentPose.HasValue)
-        {
-            pose = currentPose.Value;
-            return true;
-        }
-        pose = new PoseFrame();
-        return false;
     }
 }

@@ -5,7 +5,7 @@ public class CaptureScreenshot : MonoBehaviour {
 	
 	void Update () {
 		if (Input.GetKeyDown (KeyCode.Space)) {
-			Application.CaptureScreenshot ("image.png");
+			ScreenCapture.CaptureScreenshot ("image.png");
 		}
 	}
 }

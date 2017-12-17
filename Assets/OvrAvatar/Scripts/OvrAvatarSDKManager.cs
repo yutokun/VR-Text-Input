@@ -34,13 +34,25 @@ public class OvrAvatarSDKManager : MonoBehaviour {
 
     private void Initialize()
     {
+#if UNITY_ANDROID && !UNITY_EDITOR
+        string appId = OvrAvatarSettings.GearAppID;
+        if (appId == "")
+        {
+            Debug.Log("No Gear VR App ID has been provided. Go to Oculus Avatar > Edit Configuration to supply one", OvrAvatarSettings.Instance);
+            appId = "0";
+        }
+
+        CAPI.ovrAvatar_InitializeAndroidUnity(appId);
+#else
         string appId = OvrAvatarSettings.AppID;
         if (appId == "")
         {
-            Debug.LogError("No Oculus Rift App ID has been provided. Go to OvrAvatar > Edit Configuration to supply one", OvrAvatarSettings.Instance);
+            Debug.Log("No Oculus Rift App ID has been provided. Go to Oculus Avatar > Edit Configuration to supply one", OvrAvatarSettings.Instance);
             appId = "0";
         }
+
         CAPI.ovrAvatar_Initialize(appId);
+#endif
         specificationCallbacks = new Dictionary<UInt64, HashSet<specificationCallback>>();
         assetLoadedCallbacks = new Dictionary<UInt64, HashSet<assetLoadedCallback>>();
         assetCache = new Dictionary<ulong, OvrAvatarAsset>();
@@ -77,42 +89,53 @@ public class OvrAvatarSDKManager : MonoBehaviour {
                         case ovrAvatarAssetType.Texture:
                             assetData = new OvrAvatarAssetTexture(assetID, asset);
                             break;
+                        case ovrAvatarAssetType.Material:
+                            assetData = new OvrAvatarAssetMaterial(assetID, asset);
+                            break;
                         default:
-                            throw new NotImplementedException(
-                                string.Format("Unsupported asset type format {0}",
-                                              assetType.ToString()));
+                            throw new NotImplementedException(string.Format("Unsupported asset type format {0}", assetType.ToString()));
                     }
-                    assetCache.Add(assetID, assetData);
+
                     HashSet<assetLoadedCallback> callbackSet;
-                    if (!assetLoadedCallbacks.TryGetValue(assetMessage.assetID, out callbackSet))
+                    if (assetLoadedCallbacks.TryGetValue(assetMessage.assetID, out callbackSet))
                     {
-                        throw new Exception("Error, got an avatar specification callback from a user id we don't have a record for.");
+                        assetCache.Add(assetID, assetData);
+
+                        foreach (var callback in callbackSet)
+                        {
+                            callback(assetData);
+                        }
+
+                        assetLoadedCallbacks.Remove(assetMessage.assetID);
                     }
-                    foreach (var callback in callbackSet)
+                    else
                     {
-                        callback(assetData);
+                        Debug.LogWarning("Loaded an asset with no owner: " + assetMessage.assetID);
                     }
-                    specificationCallbacks.Remove(assetMessage.assetID);
+
                     break;
                 }
             case ovrAvatarMessageType.AvatarSpecification:
                 {
                     ovrAvatarMessage_AvatarSpecification spec = CAPI.ovrAvatarMessage_GetAvatarSpecification(message);
                     HashSet<specificationCallback> callbackSet;
-                    if (!specificationCallbacks.TryGetValue(spec.oculusUserID, out callbackSet))
+                    if (specificationCallbacks.TryGetValue(spec.oculusUserID, out callbackSet))
                     {
-                        throw new Exception("Error, got an avatar specification callback from a user id we don't have a record for.");
+                        foreach (var callback in callbackSet)
+                        {
+                            callback(spec.avatarSpec);
+                        }
+
+                        specificationCallbacks.Remove(spec.oculusUserID);
                     }
-                    foreach (var callback in callbackSet)
+                    else
                     {
-                        callback(spec.avatarSpec);
+                        Debug.LogWarning("Error, got an avatar specification callback from a user id we don't have a record for: " + spec.oculusUserID);
                     }
-                    specificationCallbacks.Remove(spec.oculusUserID);
                     break;
                 }
             default:
-                throw new NotImplementedException(
-                    "Unhandled ovrAvatarMessageType: " + messageType);
+                throw new NotImplementedException("Unhandled ovrAvatarMessageType: " + messageType);
         }
         CAPI.ovrAvatarMessage_Free(message);
 	}

@@ -7,9 +7,14 @@ public class OvrAvatarProjectorRenderComponent : OvrAvatarRenderComponent {
 
     Material material;
 
-    internal void InitializeProjectorRender(ovrAvatarRenderPart_ProjectorRender render, OvrAvatarRenderComponent target)
+    internal void InitializeProjectorRender(ovrAvatarRenderPart_ProjectorRender render, Shader shader, OvrAvatarRenderComponent target)
     {
-        material = CreateAvatarMaterial(gameObject.name + "_projector", physicallyBasedShader: false, selfOccluding: false);
+        if (shader == null)
+        {
+            shader = Shader.Find("OvrAvatar/AvatarSurfaceShader");
+        }
+
+        material = CreateAvatarMaterial(gameObject.name + "_projector", shader);
         material.EnableKeyword("PROJECTOR_ON");
 
         Renderer renderer = target.GetComponent<Renderer>();
@@ -21,11 +26,12 @@ public class OvrAvatarProjectorRenderComponent : OvrAvatarRenderComponent {
         }
     }
 
-    internal void UpdateProjectorRender(ovrAvatarRenderPart_ProjectorRender render)
+    internal void UpdateProjectorRender(OvrAvatarComponent component, ovrAvatarRenderPart_ProjectorRender render)
     {
         OvrAvatar.ConvertTransform(render.localTransform, this.transform);
         material.SetMatrix("_ProjectorWorldToLocal", this.transform.worldToLocalMatrix);
-        UpdateAvatarMaterial(material, render.materialState);
+        component.UpdateAvatarMaterial(material, render.materialState);
+        
     }
 
     void OnDrawGizmos()

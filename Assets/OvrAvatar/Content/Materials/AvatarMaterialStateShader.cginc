@@ -61,6 +61,7 @@ struct Input {
 	float3 viewDir;
 	float3 worldPos;
 	float3 worldNormal;
+	float4 vertColor : COLOR;
 #if NORMAL_MAP_ON || PARALLAX_ON
 	float3 worldTangent;
 	float3 worldBitangent;
@@ -71,9 +72,12 @@ float _Alpha;
 int _BaseMaskType;
 float4 _BaseMaskParameters;
 float4 _BaseMaskAxis;
+fixed4 _DarkMultiplier;
 fixed4 _BaseColor;
 sampler2D _AlphaMask;
 float4 _AlphaMask_ST;
+sampler2D _AlphaMask2;
+float4 _AlphaMask2_ST;
 sampler2D _NormalMap;
 float4 _NormalMap_ST;
 sampler2D _ParallaxMap;
@@ -85,6 +89,8 @@ float4x4 _ProjectorWorldToLocal;
 void vert(inout appdata_full v, out Input o) {
 	UNITY_INITIALIZE_OUTPUT(Input, o);
 	o.texcoord = v.texcoord.xy;
+	o.vertColor = v.color;
+
 #if NORMAL_MAP_ON || PARALLAX_ON
 	o.worldNormal = normalize(mul(unity_ObjectToWorld, float4(v.normal, 0.0)).xyz);
 	o.worldTangent = normalize(mul(unity_ObjectToWorld, float4(v.tangent.xyz, 0.0)).xyz);
@@ -193,7 +199,7 @@ float ComputeMask(
 #ifdef NORMAL_MAP_ON
 		float normalMapStrength = layerParameters.w;
 #endif
-		float d = 1.0 - max(0.0, dot(IN.viewDir, COMPUTE_NORMAL));
+		float d = saturate(1.0 - max(0.0, dot(IN.viewDir, COMPUTE_NORMAL)));
 		float p = pow(d, power);
 		return saturate(lerp(fadeStart, fadeEnd, p));
 	}
@@ -283,8 +289,16 @@ void surf(Input IN, inout SurfaceOutput o) {
 	c.rgb = LAYER_BLEND(7, c.rgb);
 #endif
 
-	o.Emission = c.rgb;
-	o.Alpha = _Alpha * c.a * tex2D(_AlphaMask, TRANSFORM_TEX(uv, _AlphaMask)).r * ComputeMask(MASK_INPUTS, _BaseMaskType, _BaseMaskParameters, _BaseMaskAxis);
+#ifdef VERTALPHA_ON
+	float scaledValue = IN.vertColor.a * 2.0;
+	float alpha0weight = max(0.0, 1.0 - scaledValue);
+	float alpha2weight = max(0.0, scaledValue - 1.0);
+	float alpha1weight = 1.0 - alpha0weight - alpha2weight;
+	o.Alpha = _Alpha * c.a * (tex2D(_AlphaMask, TRANSFORM_TEX(uv, _AlphaMask)).r * alpha1weight + tex2D(_AlphaMask2, TRANSFORM_TEX(uv, _AlphaMask2)).r * alpha2weight + alpha0weight) * ComputeMask(MASK_INPUTS, _BaseMaskType, _BaseMaskParameters, _BaseMaskAxis);
+#else
+	o.Alpha = _Alpha * c.a * tex2D(_AlphaMask, TRANSFORM_TEX(uv, _AlphaMask)).r * IN.vertColor.a * ComputeMask(MASK_INPUTS, _BaseMaskType, _BaseMaskParameters, _BaseMaskAxis);
+#endif
+	o.Emission = lerp(c.rgb, c.rgb * _DarkMultiplier, IN.vertColor.r);
 }
 
 #endif

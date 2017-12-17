@@ -127,31 +127,34 @@ public class OVRBoundary
 		int pointsCount = 0;
 		if (OVRPlugin.GetBoundaryGeometry2((OVRPlugin.BoundaryType)boundaryType, IntPtr.Zero, ref pointsCount))
 		{
-			int requiredNativeBufferCapacity = pointsCount * cachedVector3fSize;
-			if (cachedGeometryNativeBuffer.GetCapacity() < requiredNativeBufferCapacity)
-				cachedGeometryNativeBuffer.Reset(requiredNativeBufferCapacity);
-
-			int requiredManagedBufferCapacity = pointsCount * 3;
-			if (cachedGeometryManagedBuffer.Length < requiredManagedBufferCapacity)
-				cachedGeometryManagedBuffer = new float[requiredManagedBufferCapacity];
-			
-			if (OVRPlugin.GetBoundaryGeometry2((OVRPlugin.BoundaryType)boundaryType, cachedGeometryNativeBuffer.GetPointer(), ref pointsCount))
+			if (pointsCount > 0)
 			{
-				Marshal.Copy(cachedGeometryNativeBuffer.GetPointer(), cachedGeometryManagedBuffer, 0, requiredManagedBufferCapacity);
+				int requiredNativeBufferCapacity = pointsCount * cachedVector3fSize;
+				if (cachedGeometryNativeBuffer.GetCapacity() < requiredNativeBufferCapacity)
+					cachedGeometryNativeBuffer.Reset(requiredNativeBufferCapacity);
 
-				Vector3[] points = new Vector3[pointsCount];
+				int requiredManagedBufferCapacity = pointsCount * 3;
+				if (cachedGeometryManagedBuffer.Length < requiredManagedBufferCapacity)
+					cachedGeometryManagedBuffer = new float[requiredManagedBufferCapacity];
 
-				for (int i = 0; i < pointsCount; i++)
+				if (OVRPlugin.GetBoundaryGeometry2((OVRPlugin.BoundaryType)boundaryType, cachedGeometryNativeBuffer.GetPointer(), ref pointsCount))
 				{
-					points[i] = new OVRPlugin.Vector3f()
-					{
-						x = cachedGeometryManagedBuffer[3 * i + 0],
-						y = cachedGeometryManagedBuffer[3 * i + 1],
-						z = cachedGeometryManagedBuffer[3 * i + 2],
-					}.FromFlippedZVector3f();
-				}
+					Marshal.Copy(cachedGeometryNativeBuffer.GetPointer(), cachedGeometryManagedBuffer, 0, requiredManagedBufferCapacity);
 
-				return points;
+					Vector3[] points = new Vector3[pointsCount];
+
+					for (int i = 0; i < pointsCount; i++)
+					{
+						points[i] = new OVRPlugin.Vector3f()
+						{
+							x = cachedGeometryManagedBuffer[3 * i + 0],
+							y = cachedGeometryManagedBuffer[3 * i + 1],
+							z = cachedGeometryManagedBuffer[3 * i + 2],
+						}.FromFlippedZVector3f();
+					}
+
+					return points;
+				}
 			}
 		}
 
