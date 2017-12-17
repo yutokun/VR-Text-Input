@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.Events;
 
 public class TextHandler : MonoBehaviour {
 
@@ -9,6 +10,18 @@ public class TextHandler : MonoBehaviour {
 	[Header ("コールバックの含まれる GameObject")]
 	[Tooltip ("ここで指定した GameObject に含まれる OnJPInput() に対して文字列が送られます。")]
 	public GameObject[] gameObjects;
+
+	[System.Serializable]
+	public class OnKanjiInput : UnityEvent<string> {
+	}
+
+	public OnKanjiInput onKanjiInput;
+
+	[System.Serializable]
+	public class OnKanaInput : UnityEvent<string> {
+	}
+
+	public OnKanaInput onKanaInput;
 
 	public bool kanjiConversion = true;
 
@@ -52,6 +65,7 @@ public class TextHandler : MonoBehaviour {
 		foreach (var item in gameObjects) {
 			item.SendMessage ("OnJPInput", str, SendMessageOptions.DontRequireReceiver);
 		}
+		onKanjiInput.Invoke (str);
 	}
 
 	/// <summary>
@@ -62,5 +76,6 @@ public class TextHandler : MonoBehaviour {
 		foreach (var item in gameObjects) {
 			item.SendMessage ("OnJPCharInput", str, SendMessageOptions.DontRequireReceiver);
 		}
+		onKanaInput.Invoke (str);
 	}
 }

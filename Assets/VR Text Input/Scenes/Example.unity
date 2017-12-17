@@ -812,6 +812,11 @@ Prefab:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 114000011952969266, guid: d53808c00439ab444b2de80da7d07a5a,
+        type: 2}
+      propertyPath: onKanjiInput.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4000010222326166, guid: d53808c00439ab444b2de80da7d07a5a, type: 2}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -852,6 +857,31 @@ Prefab:
     - target: {fileID: 1000013132421806, guid: d53808c00439ab444b2de80da7d07a5a, type: 2}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114000011952969266, guid: d53808c00439ab444b2de80da7d07a5a,
+        type: 2}
+      propertyPath: onKanjiInput.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114000011952969266, guid: d53808c00439ab444b2de80da7d07a5a,
+        type: 2}
+      propertyPath: onKanjiInput.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 114000011952969266, guid: d53808c00439ab444b2de80da7d07a5a,
+        type: 2}
+      propertyPath: onKanjiInput.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 114000011952969266, guid: d53808c00439ab444b2de80da7d07a5a,
+        type: 2}
+      propertyPath: onKanjiInput.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: GetKanji
+      objectReference: {fileID: 0}
+    - target: {fileID: 114000011952969266, guid: d53808c00439ab444b2de80da7d07a5a,
+        type: 2}
+      propertyPath: onKanjiInput.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: d53808c00439ab444b2de80da7d07a5a, type: 2}
