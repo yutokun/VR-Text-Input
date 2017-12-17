@@ -7,7 +7,6 @@ VR Text Input Method for Japanese.
 VR とハンドコントローラー向けの日本語入力システムです。
 
 [ダウンロードはこちら](https://github.com/yutokun/VR-Text-Input/releases)
-※Unity 5.5.1p2 で作成しています。
 
 ## 対応する機材
 
@@ -17,21 +16,16 @@ VR とハンドコントローラー向けの日本語入力システムです�
 
 リリースページから最新の `.unitypackage` をDLし、プロジェクトにインポートしたら次の手順に従います。
 
-### 1. Asset Store から JSON パーサーを手に入れる。
-
-下記より JSON Object （無料）をインポートして下さい。  
-https://www.assetstore.unity3d.com/jp/#!/content/710
-
-### 2. Prefab をシーンに置く
+### 1. Prefab をシーンに置く
 
 `JapaneseInputSystem` という Prefab がありますので、これをシーンに置きます。  
 
-### 3. タグを作る
+### 2. タグを作る
 
 `Kanji` タグを作り、Kanji プレハブに設定します。  
 *ややこしくてごめんなさい、この操作は不要になる予定です。*
 
-### 4. テキストの送り先を設定する
+### 3. テキストの送り先を設定する
 
 この関数を使うと、漢字を確定する度に string を得ることができます。
 
@@ -66,9 +60,8 @@ Auto Mode も実装していますが、これは全 GameObject 走査するた�
 ### 何かおかしいときのチェックリスト
 
 - Virtual Reality Supported をオンにしていますか？
-- JSON Object を Asset Store からインポートしましたか？
 - OVRCameraRig はありますか？（Touchの操作に必要）
-- Oculus Avatar はなくても構いませんが、手が見えません（そりゃそうだ）
+- Oculus Avatar はなくても構いませんが、手が見えません
 - テキストの送り先は正しく設定されていますか？ 現在のところ、これがないと最初の変換を確定した時点でエラーとなります。
 
 ## 予定

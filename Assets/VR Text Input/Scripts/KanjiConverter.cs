@@ -68,8 +68,8 @@ public class KanjiConverter : MonoBehaviour {
 		}
 		if (isConverting && prev != current) {
 			OVRHaptics.RightChannel.Mix (hapticsClip);
-			kanji [prev].color = new Color (255, 255, 255);
-			kanji [current].color = new Color (255, 0, 0);
+			kanji [prev].color = Color.white;
+			kanji [current].color = Color.red;
 		}
 		prev = current;
 	}
@@ -81,44 +81,57 @@ public class KanjiConverter : MonoBehaviour {
 		if (www.isNetworkError) {
 			Debug.Log (www.error);
 		} else {
-			//返ってくるJSONが配列[]のみで処理できないため変換
-			string result = www.downloadHandler.text.Replace ("[", "{");
-			result = result.Replace ("]", "}");
+			//変換候補を取得
+			//例：[["とうきょうの",["東京の","TOKYOの","tokyoの","Tokyoの","トウキョウの"]],["おでんや",["おでん屋","おでんや","お田野","オデンや","お田や"]]]
+			string result = www.downloadHandler.text;
 
-			//JSONをプログラムから扱える形式に変換
-			JSONObject j = new JSONObject (result);
+			//文節に分割
+			var phrases = result.Split (new string[] { "]],[" }, System.StringSplitOptions.None);
 
-//			j.list [?].list [0]に変換前の文字が、
-//			j.list [?].list [1].keys [?]に変換後の文字が入っている。
-//			Debug.Log ("変換文節の数：" + j.list.Count);
-//			Debug.Log ("候補の数：" + j.list [0].list [1].keys.Count);
-//			Debug.Log ("変化前の文字数" + j.list [0].list [0].ToString ().Length);
+			//不要な文字列（",[]）を削除
+			for (int i = 0; i < phrases.Length; i++) {
+				phrases [i] = phrases [i].Replace ("\"", "");
+				phrases [i] = phrases [i].Replace ("[", "");
+				phrases [i] = phrases [i].Replace ("]", "");
+			}
+
+			//不要文字削除後の例
+			//とうきょうの,東京の,TOKYOの,tokyoの,Tokyoの,トウキョウの
+			//おでん,おでん,オデン,お田,お伝,おデン
 
 			//Aボタンの挙動を変更
 			isConverting = true;
 
-			//前回変換時の赤が残ってしまうのでリセット
-			foreach (var item in kanji) {
-				item.color = new Color (255, 255, 255);
-			}
+			for (int i = 0; i < phrases.Length; i++) {
+				//変換候補
+				var candidates = new List<string> (phrases [i].Split (','));
 
-			for (int phrase = 0; phrase < j.list.Count; phrase++) {
-				foreach (var item in kanji) {
-					item.text = ""; //前回の変換結果が残ることがあるのでクリア
-				}
-				int numberOfCandidate = j.list [phrase].list [1].keys.Count; //変換候補の数
-				for (int i = 0; i < numberOfCandidate; i++) {
-					kanji [i].text = j.list [phrase].list [1].keys [i]; //変換候補をKanjiに並べる
-				}
+				//変換前文字列
+				string original = candidates [0];
+
+				//変換候補から変換前文字列を除去
+				candidates.RemoveAt (0);
+
+				//変換候補を TextMesh kanji に並べる
+				for (int j = 0; j < candidates.Count; j++)
+					kanji [j].text = candidates [j];
+				
 				yield return new WaitUntil (() => OVRInput.GetDown (OVRInput.RawButton.A));
-				if (current > numberOfCandidate) {
-					current = numberOfCandidate - 1;
-				}
-				textHandler.Send (j.list [phrase].list [1].keys [current], j.list [phrase].list [0].ToString ().Length - 2); //選んだ候補を入力
+
+				//選んだ候補を入力
+				textHandler.Send (candidates [current], original.Length);
+
+				//変換表示をクリア
+				foreach (var item in kanji)
+					item.text = "";
+				
 				yield return null;
 			}
+
+			//変換候補枠の色をリセット
 			foreach (var item in kanji)
-				item.text = "";
+				item.color = Color.white;
+			
 			isConverting = false;
 		}
 	}
