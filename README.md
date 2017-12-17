@@ -1,4 +1,4 @@
-# VR-Text-Input
+# VR日本語入力
 
 ![概要.gif](http://yutokun.com/vr/jpinput/1-overview.gif)
 
@@ -15,7 +15,7 @@ VR とハンドコントローラー向けの日本語入力システムです�
 
 ## 実装方法
 
-リリースページから最新の `.unitypackage` をDLし、プロジェクトにインポートしたら次の手順に従います。
+[リリースページ](https://github.com/yutokun/VR-Text-Input/releases)から最新の `.unitypackage` をDLし、プロジェクトにインポートしたら次の手順に従います。
 
 ### 1. Prefab をシーンに置く
 
@@ -23,7 +23,7 @@ VR とハンドコントローラー向けの日本語入力システムです�
 
 ### 2. テキストの送り先を設定する
 
-この関数を実装すると、漢字を確定する度に string を得ることができます。
+この関数を実装すると、**漢字を確定する度に string を得る**ことができます。
 
 ```
 void OnJPInput (string str) {
@@ -31,7 +31,7 @@ void OnJPInput (string str) {
 }
 ```
 
-また、次の関数を使うと、1文字入力する度に平仮名の string を得ることができます。
+また、次の関数を使うと、**1文字入力する度に平仮名の string を得る**ことができます。
 
 ```
 void OnJPCharInput (string str) {
@@ -49,13 +49,12 @@ void OnBackspace() {
 }
 ```
 
-最後にとても重要な事ですが、上記関数の含まれる GameObject をシーン中の JapaneseInputSystem にある Text Handler コンポーネントに設定して下さい。ここで指定した GameObject 内で `OnJPInput()` やらを探します。
+最後にとても重要な事ですが、**上記関数の含まれる GameObject をシーン中の JapaneseInputSystem にある Text Handler コンポーネントに設定**して下さい。ここで指定した GameObject 内で `OnJPInput()` やらを探します。
 
 Auto Mode も実装していますが、これは全 GameObject 走査するため、シーンの規模によってはフレーム落ちの原因となる可能性があります。お試し用と思って下さい。
 
 ### 何かおかしいときのチェックリスト
 
-- Virtual Reality Supported をオンにしていますか？
 - OVRCameraRig はありますか？（Touchの操作に必要）
 - Oculus Avatar はなくても構いませんが、手が見えません
 - テキストの送り先は正しく設定されていますか？ 現在のところ、これがないと最初の変換を確定した時点でエラーとなります。
