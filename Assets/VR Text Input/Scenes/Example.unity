@@ -416,7 +416,7 @@ TextMesh:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 704567261}
-  m_Text: "VR\u65E5\u672C\u8A9E\u5165\u529B\n\u30D0\u30FC\u30B8\u30E7\u30F3\uFF1A0.5.1\nTwitter:
+  m_Text: "VR\u65E5\u672C\u8A9E\u5165\u529B\n\u30D0\u30FC\u30B8\u30E7\u30F3\uFF1A0.6.0\nTwitter:
     @yutoVR"
   m_OffsetZ: 0
   m_CharacterSize: 0.01
