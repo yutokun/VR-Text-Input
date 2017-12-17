@@ -21,14 +21,9 @@ VR とハンドコントローラー向けの日本語入力システムです�
 
 `JapaneseInputSystem` という Prefab がありますので、これをシーンに置きます。  
 
-### 2. タグを作る
+### 2. テキストの送り先を設定する
 
-`Kanji` タグを作り、Kanji プレハブに設定します。  
-*ややこしくてごめんなさい、この操作は不要になる予定です。*
-
-### 3. テキストの送り先を設定する
-
-この関数を使うと、漢字を確定する度に string を得ることができます。
+この関数を実装すると、漢字を確定する度に string を得ることができます。
 
 ```
 void OnJPInput (string str) {
@@ -40,7 +35,7 @@ void OnJPInput (string str) {
 
 ```
 void OnJPCharInput (string str) {
-Debug.Log(str); //例
+	Debug.Log(str); //例
 }
 ```
 

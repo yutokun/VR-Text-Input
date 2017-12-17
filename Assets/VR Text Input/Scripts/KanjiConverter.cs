@@ -29,13 +29,13 @@ public class KanjiConverter : MonoBehaviour {
 		hapticsClip = new OVRHapticsClip (hapticsBytes, hapticsBytes.Length);
 
 		//漢字の変換候補枠を作成
+		var kanjis = new List<GameObject> ();
 		for (int i = 0; i < 5; i++) {
-			Instantiate (kanjiPrefab, transform.position, transform.rotation, transform.parent);
+			kanjis.Add (Instantiate (kanjiPrefab, transform.position, transform.rotation, transform));
 		}
 
 		//漢字候補枠を取得してクリア
-		GameObject[] kanjis = GameObject.FindGameObjectsWithTag ("Kanji");
-		for (int i = 0; i < kanjis.Length; i++) {
+		for (int i = 0; i < kanjis.Count; i++) {
 			kanji.Add (kanjis [i].GetComponent<TextMesh> ());
 			kanjis [i].transform.Translate (0, (i + 1) * -0.1763988f, 0);
 			kanji [i].text = "";
