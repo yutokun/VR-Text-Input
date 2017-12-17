@@ -11,6 +11,7 @@ public class KanjiConverter : MonoBehaviour {
 	[SerializeField] GameObject kanjiPrefab;
 	[SerializeField] List<TextMesh> kanji;
 	OVRHapticsClip hapticsClip;
+	[SerializeField, Range (0.1f, 0.2f)] float space = 0.1763988f;
 
 	void Start () {
 		//テキスト入力欄への参照を取得
@@ -29,15 +30,10 @@ public class KanjiConverter : MonoBehaviour {
 		hapticsClip = new OVRHapticsClip (hapticsBytes, hapticsBytes.Length);
 
 		//漢字の変換候補枠を作成
-		var kanjis = new List<GameObject> ();
 		for (int i = 0; i < 5; i++) {
-			kanjis.Add (Instantiate (kanjiPrefab, transform.position, transform.rotation, transform));
-		}
-
-		//漢字候補枠を取得してクリア
-		for (int i = 0; i < kanjis.Count; i++) {
-			kanji.Add (kanjis [i].GetComponent<TextMesh> ());
-			kanjis [i].transform.Translate (0, (i + 1) * -0.1763988f, 0);
+			var obj = Instantiate (kanjiPrefab, transform.position, transform.rotation, transform);
+			obj.transform.Translate (0, (i + 1) * -space, 0);
+			kanji.Add (obj.GetComponent<TextMesh> ());
 			kanji [i].text = "";
 		}
 	}
