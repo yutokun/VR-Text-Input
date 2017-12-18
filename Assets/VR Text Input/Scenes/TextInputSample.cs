@@ -10,7 +10,7 @@ public class TextInputSample : MonoBehaviour {
 	//漢字変換後の入力を受け取るサンプルです。
 	//OnJPInput(string) は漢字変換を確定するたびにコールされ、
 	//確定した文字列を引数として取得できます。
-	void OnJPInput (string str) {
+	void OnJPKanjiInput (string str) {
 		if (kanjiInput)
 			textMesh.text += str;
 	}
@@ -18,7 +18,7 @@ public class TextInputSample : MonoBehaviour {
 	//漢字変換前のひらがなを受け取るサンプルです。
 	//OnJPCharInput(string) は文字入力のたびにコールされ、
 	//入力した文字列を引数として取得できます。
-	void OnJPCharInput (string str) {
+	void OnJPKanaInput (string str) {
 		if (hiraganaInput)
 			textMesh.text += str;
 	}

@@ -8,20 +8,20 @@ public class TextHandler : MonoBehaviour {
 	public TextMesh temporary;
 
 	[Header ("コールバックの含まれる GameObject")]
-	[Tooltip ("ここで指定した GameObject に含まれる OnJPInput() に対して文字列が送られます。")]
+	[Tooltip ("ここで指定した GameObject に含まれる OnJPKanjiInput() に対して文字列が送られます。")]
 	public GameObject[] gameObjects;
 
 	[System.Serializable]
-	public class OnKanjiInput : UnityEvent<string> {
+	public class OnJPKanjiInput : UnityEvent<string> {
 	}
 
-	public OnKanjiInput onKanjiInput;
+	public OnJPKanjiInput onJpKanjiInput;
 
 	[System.Serializable]
-	public class OnKanaInput : UnityEvent<string> {
+	public class OnJPKanaInput : UnityEvent<string> {
 	}
 
-	public OnKanaInput onKanaInput;
+	public OnJPKanaInput onJpKanaInput;
 
 	public bool kanjiConversion = true;
 
@@ -54,7 +54,7 @@ public class TextHandler : MonoBehaviour {
 	}
 
 	/// <summary>
-	/// Inspector で指定したGameObject の OnJPInput() に変換済みテキストを送信。
+	/// Inspector で指定したGameObject の OnJPKanjiInput() に変換済みテキストを送信。
 	/// </summary>
 	/// <param name="str">送信する文字</param>
 	/// <param name="deleteCount">一時入力エリアから削除する文字数</param>
@@ -63,19 +63,19 @@ public class TextHandler : MonoBehaviour {
 			deleteCount = temporary.text.Length;
 		temporary.text = temporary.text.Remove (0, deleteCount);
 		foreach (var item in gameObjects) {
-			item.SendMessage ("OnJPInput", str, SendMessageOptions.DontRequireReceiver);
+			item.SendMessage ("OnJPKanjiInput", str, SendMessageOptions.DontRequireReceiver);
 		}
-		onKanjiInput.Invoke (str);
+		onJpKanjiInput.Invoke (str);
 	}
 
 	/// <summary>
-	/// Inspector で指定したGameObject の OnJPCharInput() に変換前のひらがなを送信。
+	/// Inspector で指定したGameObject の OnJPKanaInput() に変換前のひらがなを送信。
 	/// </summary>
 	/// <param name="str">String.</param>
 	public void SendChar (string str) {
 		foreach (var item in gameObjects) {
-			item.SendMessage ("OnJPCharInput", str, SendMessageOptions.DontRequireReceiver);
+			item.SendMessage ("OnJPKanaInput", str, SendMessageOptions.DontRequireReceiver);
 		}
-		onKanaInput.Invoke (str);
+		onJpKanaInput.Invoke (str);
 	}
 }
