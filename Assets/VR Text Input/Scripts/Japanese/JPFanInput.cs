@@ -3,9 +3,9 @@ using System.Collections;
 using UnityEngine.UI;
 using UnityEngine.VR;
 
-public class JapaneseFanInputHandler : MonoBehaviour {
+public class JPFanInput : MonoBehaviour {
 
-	[SerializeField]TextHandler textHandler;
+	[SerializeField]JPTextHandler textHandler;
 	KanjiConverter kanji;
 
 	//hand は針

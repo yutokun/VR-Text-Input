@@ -2,7 +2,7 @@
 using System.Collections;
 using UnityEngine.Events;
 
-public class TextHandler : MonoBehaviour {
+public class JPTextHandler : MonoBehaviour {
 
 	//一時入力エリア
 	public TextMesh temporary;

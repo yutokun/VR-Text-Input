@@ -7,7 +7,7 @@ using UnityEngine.VR;
 public class KanjiConverter : MonoBehaviour {
 
 	TextMesh textMesh;
-	TextHandler textHandler;
+	JPTextHandler textHandler;
 	[SerializeField] GameObject kanjiPrefab;
 	List<TextMesh> kanji = new List<TextMesh> ();
 	OVRHapticsClip hapticsClip;
@@ -18,8 +18,8 @@ public class KanjiConverter : MonoBehaviour {
 		textMesh = GetComponent<TextMesh> ();
 
 		//漢字変換がオフなら変換エリアを非表示
-		textHandler = FindObjectOfType<TextHandler> ();
-		if (textHandler.inputType == TextHandler.JPInputType.Kana)
+		textHandler = FindObjectOfType<JPTextHandler> ();
+		if (textHandler.inputType == JPTextHandler.JPInputType.Kana)
 			transform.parent.GetComponent<MeshRenderer> ().enabled = false;
 
 		//振動準備

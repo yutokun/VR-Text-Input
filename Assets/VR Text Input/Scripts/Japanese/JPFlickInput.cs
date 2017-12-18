@@ -2,7 +2,7 @@
 using System.Collections;
 using UnityEngine.UI;
 
-public class JapaneseFlickInputHandler : MonoBehaviour {
+public class JPFlickInput : MonoBehaviour {
 
 	GameObject hand;
 	RaycastHit hit;
@@ -13,12 +13,12 @@ public class JapaneseFlickInputHandler : MonoBehaviour {
 	//振動データ
 	OVRHapticsClip hapticsClip;
 
-	TextHandler textHandler;
+	JPTextHandler textHandler;
 	KanjiConverter kanji;
 
 	void Start () {
 		hand = GameObject.Find ("RightHandAnchor");
-		textHandler = FindObjectOfType<TextHandler> ();
+		textHandler = FindObjectOfType<JPTextHandler> ();
 		kanji = FindObjectOfType<KanjiConverter> ();
 
 		//振動用のデータを作成
