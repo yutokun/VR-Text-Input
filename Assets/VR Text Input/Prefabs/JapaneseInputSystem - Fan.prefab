@@ -1728,11 +1728,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff7ad2c7e0a50b044abc1e73cc75882e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  temporary: {fileID: 0}
+  temporary: {fileID: 102000011961049240}
+  inputType: 0
   gameObjects:
   - {fileID: 0}
-  kanjiConversion: 1
   autoMode: 0
+  onJpInput:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: TextHandler+OnJPInput, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
 --- !u!114 &114000013386279442
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1744,6 +1749,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a4c6f35a778246d46a4af789d6e6b75b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  textHandler: {fileID: 114000011952969266}
   handParent: {fileID: 1000014193189516}
   upperVariationParent: {fileID: 1000012435514388}
   lowerVariationParent: {fileID: 1000011054411500}
@@ -1763,4 +1769,5 @@ MonoBehaviour:
   kanjiPrefab: {fileID: 1000013391251980, guid: 5eb4da39b1aa64a42b98c21986053ddb,
     type: 2}
   kanji: []
+  space: 0.1763988
   isConverting: 0

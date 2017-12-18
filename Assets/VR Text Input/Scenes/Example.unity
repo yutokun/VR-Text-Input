@@ -656,8 +656,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   textMesh: {fileID: 1043295386}
-  hiraganaInput: 0
-  kanjiInput: 1
 --- !u!1001 &1118854002
 Prefab:
   m_ObjectHideFlags: 0
@@ -814,7 +812,12 @@ Prefab:
     m_Modifications:
     - target: {fileID: 114000011952969266, guid: d53808c00439ab444b2de80da7d07a5a,
         type: 2}
-      propertyPath: onKanjiInput.m_PersistentCalls.m_Calls.Array.size
+      propertyPath: onJpInput.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114000011952969266, guid: d53808c00439ab444b2de80da7d07a5a,
+        type: 2}
+      propertyPath: onBackspace.m_PersistentCalls.m_Calls.Array.size
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4000010222326166, guid: d53808c00439ab444b2de80da7d07a5a, type: 2}
@@ -854,33 +857,59 @@ Prefab:
       propertyPath: gameObjects.Array.data[0]
       value: 
       objectReference: {fileID: 1043295384}
-    - target: {fileID: 1000013132421806, guid: d53808c00439ab444b2de80da7d07a5a, type: 2}
-      propertyPath: m_IsActive
+    - target: {fileID: 114000011952969266, guid: d53808c00439ab444b2de80da7d07a5a,
+        type: 2}
+      propertyPath: target
+      value: 
+      objectReference: {fileID: 1043295384}
+    - target: {fileID: 114000011952969266, guid: d53808c00439ab444b2de80da7d07a5a,
+        type: 2}
+      propertyPath: onBackspace.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 114000011952969266, guid: d53808c00439ab444b2de80da7d07a5a,
         type: 2}
-      propertyPath: onKanjiInput.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 114000011952969266, guid: d53808c00439ab444b2de80da7d07a5a,
-        type: 2}
-      propertyPath: onKanjiInput.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      propertyPath: onBackspace.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 114000011952969266, guid: d53808c00439ab444b2de80da7d07a5a,
         type: 2}
-      propertyPath: onKanjiInput.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      propertyPath: onJpInput.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114000011952969266, guid: d53808c00439ab444b2de80da7d07a5a,
+        type: 2}
+      propertyPath: onJpInput.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 114000011952969266, guid: d53808c00439ab444b2de80da7d07a5a,
+        type: 2}
+      propertyPath: onJpInput.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
+      objectReference: {fileID: 1043295388}
+    - target: {fileID: 114000011952969266, guid: d53808c00439ab444b2de80da7d07a5a,
+        type: 2}
+      propertyPath: onBackspace.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1043295388}
+    - target: {fileID: 114000011952969266, guid: d53808c00439ab444b2de80da7d07a5a,
+        type: 2}
+      propertyPath: onJpInput.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnJPInput
       objectReference: {fileID: 0}
     - target: {fileID: 114000011952969266, guid: d53808c00439ab444b2de80da7d07a5a,
         type: 2}
-      propertyPath: onKanjiInput.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: GetKanji
+      propertyPath: onJpInput.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 114000011952969266, guid: d53808c00439ab444b2de80da7d07a5a,
         type: 2}
-      propertyPath: onKanjiInput.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      propertyPath: onBackspace.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnBackspace
+      objectReference: {fileID: 0}
+    - target: {fileID: 114000011952969266, guid: d53808c00439ab444b2de80da7d07a5a,
+        type: 2}
+      propertyPath: onBackspace.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     m_RemovedComponents: []

@@ -9,7 +9,7 @@ public class KanjiConverter : MonoBehaviour {
 	TextMesh textMesh;
 	TextHandler textHandler;
 	[SerializeField] GameObject kanjiPrefab;
-	[SerializeField] List<TextMesh> kanji;
+	List<TextMesh> kanji = new List<TextMesh> ();
 	OVRHapticsClip hapticsClip;
 	[SerializeField, Range (0.1f, 0.2f)] float space = 0.1763988f;
 
@@ -19,7 +19,7 @@ public class KanjiConverter : MonoBehaviour {
 
 		//漢字変換がオフなら変換エリアを非表示
 		textHandler = FindObjectOfType<TextHandler> ();
-		if (textHandler.kanjiConversion == false)
+		if (textHandler.inputType == TextHandler.JPInputType.Kana)
 			transform.parent.GetComponent<MeshRenderer> ().enabled = false;
 
 		//振動準備

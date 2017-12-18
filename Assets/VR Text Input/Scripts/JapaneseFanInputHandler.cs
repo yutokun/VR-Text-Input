@@ -5,6 +5,9 @@ using UnityEngine.VR;
 
 public class JapaneseFanInputHandler : MonoBehaviour {
 
+	[SerializeField]TextHandler textHandler;
+	KanjiConverter kanji;
+
 	//hand は針
 	[SerializeField] GameObject handParent, upperVariationParent, lowerVariationParent;
 	TextMesh[] selectorTexts, upperTexts, lowerTexts;
@@ -20,9 +23,6 @@ public class JapaneseFanInputHandler : MonoBehaviour {
 	int consonantIndex;
 
 	public Color baseColor = new Color (255, 255, 255), highlightColor = new Color (255, 0, 0);
-
-	TextHandler textHandler;
-	KanjiConverter kanji;
 
 	string[,] jpChars = new string[10, 5] {
 		{ "あ", "い", "う", "え", "お" },
@@ -65,11 +65,10 @@ public class JapaneseFanInputHandler : MonoBehaviour {
 
 	void Start () {
 		//入力候補欄への参照を取得
-		selectorTexts = GameObject.Find ("Characters").GetComponentsInChildren<TextMesh> ();
+		selectorTexts = GetComponentsInChildren<TextMesh> ();
 		upperTexts = upperVariationParent.GetComponentsInChildren<TextMesh> ();
 		lowerTexts = lowerVariationParent.GetComponentsInChildren<TextMesh> ();
 
-		textHandler = FindObjectOfType<TextHandler> ();
 		kanji = FindObjectOfType<KanjiConverter> ();
 
 		//バリエーションを非表示
@@ -145,8 +144,6 @@ public class JapaneseFanInputHandler : MonoBehaviour {
 		} else if (RIndex_Up) {
 			//離して文字を入力
 			if (afterVariationEntered == false) {
-				if (textHandler.kanjiConversion == true)
-					textHandler.temporary.text += selectorTexts [currentHandPosition].text;
 				textHandler.SendChar (selectorTexts [currentHandPosition].text);
 			}
 			afterVariationEntered = false;
@@ -169,14 +166,10 @@ public class JapaneseFanInputHandler : MonoBehaviour {
 			//かつ右親指が上下されたときにバリエーション入力
 			if (RThumbstickUp_Down) {
 				//上部バリエーションの入力
-				if (textHandler.kanjiConversion == true)
-					textHandler.temporary.text += upperVariations [consonantIndex, currentHandPosition];
 				textHandler.SendChar (upperVariations [consonantIndex, currentHandPosition]);
 				afterVariationEntered = true;
 			} else if (RThumbstickDown_Down) {
 				//下部バリエーションの入力
-				if (textHandler.kanjiConversion == true)
-					textHandler.temporary.text += lowerVariations [consonantIndex, currentHandPosition];
 				textHandler.SendChar (lowerVariations [consonantIndex, currentHandPosition]);
 				afterVariationEntered = true;
 			}
