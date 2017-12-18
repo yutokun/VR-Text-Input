@@ -5,13 +5,19 @@ using UnityEngine.SceneManagement;
 public class TextInputSample : MonoBehaviour {
 
 	[SerializeField] TextMesh textMesh;
-	[SerializeField] bool hiraganaInput, kanjiInput;
+
+	enum InputType {
+		Kanji,
+		Kana
+	}
+
+	[SerializeField] InputType inputType;
 
 	//漢字変換後の入力を受け取るサンプルです。
 	//OnJPInput(string) は漢字変換を確定するたびにコールされ、
 	//確定した文字列を引数として取得できます。
 	void OnJPKanjiInput (string str) {
-		if (kanjiInput)
+		if (inputType == InputType.Kanji)
 			textMesh.text += str;
 	}
 
@@ -19,7 +25,7 @@ public class TextInputSample : MonoBehaviour {
 	//OnJPCharInput(string) は文字入力のたびにコールされ、
 	//入力した文字列を引数として取得できます。
 	void OnJPKanaInput (string str) {
-		if (hiraganaInput)
+		if (inputType == InputType.Kana)
 			textMesh.text += str;
 	}
 
