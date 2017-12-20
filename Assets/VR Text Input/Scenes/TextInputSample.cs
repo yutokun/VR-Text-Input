@@ -10,7 +10,7 @@ public class TextInputSample : MonoBehaviour {
 	//TextHandler の UnityEvent に登録して呼び出します。
 	//確定した文字列を引数として取得します。
 	//文字の種別は、TextHandler の JPInputType で変更できます。
-	public void OnJPInput (string str) {
+	public void OnTextInput (string str) {
 		textMesh.text += str;
 	}
 
