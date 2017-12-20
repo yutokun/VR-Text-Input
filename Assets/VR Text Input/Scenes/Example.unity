@@ -650,15 +650,6 @@ Prefab:
       propertyPath: onBackspace.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 1043295388}
-    - target: {fileID: 1000013132421806, guid: d53808c00439ab444b2de80da7d07a5a, type: 2}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 114000011952969266, guid: d53808c00439ab444b2de80da7d07a5a,
-        type: 2}
-      propertyPath: onJpInput.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: OnTextInput
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: d53808c00439ab444b2de80da7d07a5a, type: 2}
   m_IsPrefabParent: 0
