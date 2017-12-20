@@ -19,39 +19,37 @@ VR とハンドコントローラー向けの日本語入力システムです�
 
 ### 1. Prefab をシーンに置く
 
-`JapaneseInputSystem` という Prefab がありますので、これをシーンに置きます。  
+Prefab フォルダの中に言語と方式別のプレハブを用意してありますので、これをシーンに置きます。  
 
 ### 2. テキストの送り先を設定する
 
-この関数を実装すると、**漢字を確定する度に string を得る**ことができます。
+Unity Event で入力された文字列を受け取ることができます。
+
+下記のように、string を引数とする public 関数を作成して下さい。
 
 ```
-void OnJPInput (string str) {
+public void OnJPInput (string str) {
 	Debug.Log(str); //例
 }
 ```
 
-また、次の関数を使うと、**1文字入力する度に平仮名の string を得る**ことができます。
+これを Inspector で登録、あるいはコードから `AddListener()` することで文字列を受信することができます。
 
-```
-void OnJPCharInput (string str) {
-	Debug.Log(str); //例
-}
-```
+デフォルトでは、**漢字を確定する度に string を得る**ことができます。
 
-また、変換用テキストボックスと実際の入力先で1文字削除ボタンを使い分けるため、下記の関数を用意しました。  
+また、プレハブの TextHandler に存在する `InputType` を `Kana` に切り替えることで、**1文字入力する度に平仮名の string を得る**ことができます。
+
+![Japanese.png](Japanese.png)
+
+また、文字列の削除用に `OnBackspace` イベントを用意しました。  
 変換用テキストボックスが空であり、かつB（削除）ボタンが押されたときに呼び出されます。ここに都合に合わせて1文字削除を実装して下さい。
 
 ```
-void OnBackspace() {
+public void OnBackspace() {
 	//最後の1文字を削除する。
 	textMesh.text = textMesh.text.Remove (textMesh.text.Length - 1, 1);
 }
 ```
-
-最後にとても重要な事ですが、**上記関数の含まれる GameObject をシーン中の JapaneseInputSystem にある Text Handler コンポーネントに設定**して下さい。ここで指定した GameObject 内で `OnJPInput()` やらを探します。
-
-Auto Mode も実装していますが、これは全 GameObject 走査するため、シーンの規模によってはフレーム落ちの原因となる可能性があります。お試し用と思って下さい。
 
 ### 何かおかしいときのチェックリスト
 
@@ -90,3 +88,4 @@ SOFTWARE.
 
 **Oculus Integration**  
 Copyright © 2014-2017 Oculus VR, LLC. All rights reserved,
+
