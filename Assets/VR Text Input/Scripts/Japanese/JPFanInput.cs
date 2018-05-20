@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
-using UnityEngine.VR;
+using UnityEngine.XR;
 
 public class JPFanInput : MonoBehaviour {
 
@@ -84,7 +84,7 @@ public class JPFanInput : MonoBehaviour {
 
 	void Update () {
 		//針の状態を判定
-		float eulerTemp = InputTracking.GetLocalRotation (VRNode.RightHand).eulerAngles.z;
+		float eulerTemp = InputTracking.GetLocalRotation (XRNode.RightHand).eulerAngles.z;
 		if (300 < eulerTemp && eulerTemp <= 324) {
 			currentHandPosition = 4;
 		} else if (324 < eulerTemp && eulerTemp <= 348) {

@@ -2,7 +2,7 @@
 using System.Collections;
 using UnityEngine.Networking;
 using System.Collections.Generic;
-using UnityEngine.VR;
+using UnityEngine.XR;
 
 public class KanjiConverter : MonoBehaviour {
 
@@ -47,7 +47,7 @@ public class KanjiConverter : MonoBehaviour {
 			StartCoroutine (Convert ());
 
 		//色と振動の処理
-		float euler = InputTracking.GetLocalRotation (VRNode.RightHand).eulerAngles.x;
+		float euler = InputTracking.GetLocalRotation (XRNode.RightHand).eulerAngles.x;
 		if (euler < 300) {
 			current = current;
 		} else if (euler < 310) {
@@ -73,7 +73,7 @@ public class KanjiConverter : MonoBehaviour {
 		UnityWebRequest www = UnityWebRequest.Get ("http://www.google.com/transliterate?langpair=ja-Hira|ja&text=" + WWW.EscapeURL (textMesh.text));
 		yield return www.Send ();
 
-		if (www.isError) {
+		if (www.isNetworkError) {
 			Debug.Log (www.error);
 		} else {
 			//変換候補を取得

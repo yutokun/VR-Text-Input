@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
-using UnityEngine.VR;
+using UnityEngine.XR;
 
 public class ENSlideInput : MonoBehaviour {
 
@@ -100,17 +100,18 @@ public class ENSlideInput : MonoBehaviour {
 
 		//Initialize state.
 		Reposition ();
+		HandButtonDown ();
 	}
 
 	void Update () {
 		// Update position and rotation of transform.
 		// Y position.
 		Vector3 pos = transform.position;
-		pos.y -= Mathf.DeltaAngle (0, InputTracking.GetLocalRotation (VRNode.RightHand).eulerAngles.x) / 200f;
+		pos.y -= Mathf.DeltaAngle (0, InputTracking.GetLocalRotation (XRNode.RightHand).eulerAngles.x) / 200f;
 		anchor.position = pos;
 		// Y rotation.
 		var euler = Vector3.zero;
-		euler.y = InputTracking.GetLocalRotation (VRNode.RightHand).eulerAngles.y;
+		euler.y = InputTracking.GetLocalRotation (XRNode.RightHand).eulerAngles.y;
 		anchor.eulerAngles = euler;
 
 		// Change character set.
@@ -143,12 +144,12 @@ public class ENSlideInput : MonoBehaviour {
 	void Reposition () {
 		// Reset rotation.
 		var euler = Vector3.zero;
-		euler.y = InputTracking.GetLocalRotation (VRNode.RightHand).eulerAngles.y;
+		euler.y = InputTracking.GetLocalRotation (XRNode.RightHand).eulerAngles.y;
 		transform.eulerAngles = euler;
 
 		// Reset position.
 		// Get and set a world position of the right hand.
-		transform.position = Camera.main.transform.root.position + InputTracking.GetLocalPosition (VRNode.RightHand);
+		transform.position = Camera.main.transform.root.position + InputTracking.GetLocalPosition (XRNode.RightHand);
 		foreach (var item in parents) {
 			var pos = Vector3.zero;
 			pos.x = item.localPosition.x;
