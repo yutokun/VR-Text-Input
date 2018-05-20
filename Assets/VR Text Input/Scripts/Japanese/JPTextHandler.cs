@@ -26,12 +26,14 @@ public class JPTextHandler : MonoBehaviour {
 	}
 
 	void Update () {
-		//Bボタンで最後の1文字を削除
-		if (OVRInput.GetDown (OVRInput.RawButton.B) && temporary.text.Length != 0) {
-			//最後の1文字を消去する処理。
-			temporary.text = temporary.text.Remove (temporary.text.Length - 1, 1);
-		} else if (OVRInput.GetDown (OVRInput.RawButton.B) && temporary.text.Length == 0) {
-			onBackspace.Invoke ();
+		//Bボタン / Backボタンで最後の1文字を削除
+		if (OVRInput.GetDown (OVRInput.RawButton.B) || OVRInput.GetDown (OVRInput.RawButton.Back)) {
+			if (temporary.text.Length != 0) {
+				//最後の1文字を消去する処理。
+				temporary.text = temporary.text.Remove (temporary.text.Length - 1, 1);
+			} else if (temporary.text.Length == 0) {
+				onBackspace.Invoke ();
+			}
 		}
 
 		//テキストエリアをはみ出さないように調整

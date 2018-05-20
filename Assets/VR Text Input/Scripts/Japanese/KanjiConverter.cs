@@ -21,14 +21,7 @@ public class KanjiConverter : MonoBehaviour {
 		textHandler = FindObjectOfType<JPTextHandler> ();
 		if (textHandler.inputType == JPTextHandler.JPInputType.Kana)
 			transform.parent.GetComponent<MeshRenderer> ().enabled = false;
-
-		//振動準備
-		byte[] hapticsBytes = new byte[4];
-		for (int i = 0; i < hapticsBytes.Length; i++) {
-			hapticsBytes [i] = 128;
-		}
-		hapticsClip = new OVRHapticsClip (hapticsBytes, hapticsBytes.Length);
-
+		
 		//漢字の変換候補枠を作成
 		for (int i = 0; i < 5; i++) {
 			var obj = Instantiate (kanjiPrefab, transform.position, transform.rotation, transform);
@@ -36,14 +29,31 @@ public class KanjiConverter : MonoBehaviour {
 			kanji.Add (obj.GetComponent<TextMesh> ());
 			kanji [i].text = "";
 		}
+
+		//振動準備
+		byte[] hapticsBytes = new byte[4];
+		for (int i = 0; i < hapticsBytes.Length; i++) {
+			hapticsBytes [i] = 128;
+		}
+		hapticsClip = new OVRHapticsClip (hapticsBytes, hapticsBytes.Length);
 	}
 
 	int prev = 0, current = 0;
 	[HideInInspector] public bool isConverting = false;
 
+	bool IsConvertButtonDown {
+		get { 
+			#if UNITY_STANDALONE
+			return OVRInput.GetDown (OVRInput.RawButton.A);
+			#elif UNITY_ANDROID
+			return OVRInput.GetDown (OVRInput.Button.PrimaryTouchpad);
+			#endif
+		}
+	}
+
 	void Update () {
 		//Aボタンで漢字変換を行う
-		if (OVRInput.GetDown (OVRInput.RawButton.A) && isConverting == false && textHandler.temporary.text != "")
+		if (IsConvertButtonDown && isConverting == false && textHandler.temporary.text != "")
 			StartCoroutine (Convert ());
 
 		//色と振動の処理
@@ -62,7 +72,9 @@ public class KanjiConverter : MonoBehaviour {
 			current = 4;
 		}
 		if (isConverting && prev != current) {
+			#if UNITY_STANDALONE
 			OVRHaptics.RightChannel.Mix (hapticsClip);
+			#endif
 			kanji [prev].color = Color.white;
 			kanji [current].color = Color.red;
 		}
@@ -108,10 +120,11 @@ public class KanjiConverter : MonoBehaviour {
 				candidates.RemoveAt (0);
 
 				//変換候補を TextMesh kanji に並べる
-				for (int j = 0; j < candidates.Count; j++)
+				for (int j = 0; j < candidates.Count; j++) {
 					kanji [j].text = candidates [j];
+				}
 				
-				yield return new WaitUntil (() => OVRInput.GetDown (OVRInput.RawButton.A));
+				yield return new WaitUntil (() => IsConvertButtonDown);
 
 				//選んだ候補を入力
 				textHandler.Send (candidates [current], original.Length);

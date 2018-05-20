@@ -99,7 +99,9 @@ public class JPFanInput : MonoBehaviour {
 
 		//パネルの色を変えて振動させる
 		if (kanji.isConverting == false && currentHandPosition != prevPosition) {
+			#if UNITY_STANDALONE
 			OVRHaptics.RightChannel.Mix (hapticsClip);
+			#endif
 			selectorTexts [prevPosition].color = baseColor;
 			selectorTexts [currentHandPosition].color = highlightColor;
 		}
@@ -116,11 +118,11 @@ public class JPFanInput : MonoBehaviour {
 		bool RIndex_Down = OVRInput.GetDown (OVRInput.RawButton.RIndexTrigger);
 		bool RIndex_Hold = OVRInput.Get (OVRInput.RawButton.RIndexTrigger);
 		bool RIndex_Up = OVRInput.GetUp (OVRInput.RawButton.RIndexTrigger);
-		bool RHand_Down = OVRInput.GetDown (OVRInput.RawButton.RHandTrigger);
-		bool RHand_Hold = OVRInput.Get (OVRInput.RawButton.RHandTrigger);
-		bool RHand_Up = OVRInput.GetUp (OVRInput.RawButton.RHandTrigger);
-		bool RThumbstickUp_Down = OVRInput.GetDown (OVRInput.RawButton.RThumbstickUp);
-		bool RThumbstickDown_Down = OVRInput.GetDown (OVRInput.RawButton.RThumbstickDown);
+		bool RHand_Down = OVRInput.GetDown (OVRInput.RawButton.RHandTrigger) || OVRInput.GetDown (OVRInput.RawTouch.RTouchpad);
+		bool RHand_Hold = OVRInput.Get (OVRInput.RawButton.RHandTrigger) || OVRInput.Get (OVRInput.RawTouch.RTouchpad);
+		bool RHand_Up = OVRInput.GetUp (OVRInput.RawButton.RHandTrigger) || OVRInput.GetUp (OVRInput.RawTouch.RTouchpad);
+		bool RThumbstickUp_Down = OVRInput.GetDown (OVRInput.RawButton.RThumbstickUp) || OVRInput.GetDown (OVRInput.Button.DpadUp);
+		bool RThumbstickDown_Down = OVRInput.GetDown (OVRInput.RawButton.RThumbstickDown) || OVRInput.GetDown (OVRInput.Button.DpadDown);
 
 		//入力処理
 		if (RIndex_Down) {

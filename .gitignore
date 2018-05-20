@@ -42,6 +42,7 @@ VRTextInput.exe
 VRTextInput.zip
 Assets/JSON/
 Assets/Plugins/RainbowFolders/
+*.apk
 
 *.log #log files, for some plugins
 *.pyc #python bytecode cache, for some plugins.
