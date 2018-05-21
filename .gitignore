@@ -42,6 +42,11 @@ VRTextInput.exe
 VRTextInput.zip
 Assets/JSON/
 Assets/Plugins/RainbowFolders/
+Assets/Plugins/RainbowAssets/
+Assets/Plugins/RainbowAssets.meta
+Assets/Enhanced Hierarchy/
+Assets/Enhanced Hierarchy.meta
+.vscode/
 *.apk
 
 *.log #log files, for some plugins
