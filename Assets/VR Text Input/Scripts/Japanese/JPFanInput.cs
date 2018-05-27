@@ -63,6 +63,18 @@ public class JPFanInput : MonoBehaviour {
 		{ "", "", "…", "/", "" }
 	};
 
+	bool latestIsFirstSet;
+
+	bool IsFirstSet {
+		get {
+			#if UNITY_STANDALONE
+			return OVRInput.Get (OVRInput.RawButton.RHandTrigger);
+			#elif UNITY_ANDROID
+			return selectorTexts [0].text.Contains ("あ");
+			#endif
+		}
+	}
+
 	void Start () {
 		//入力候補欄への参照を取得
 		selectorTexts = GetComponentsInChildren<TextMesh> ();
@@ -119,7 +131,6 @@ public class JPFanInput : MonoBehaviour {
 		bool RIndex_Hold = OVRInput.Get (OVRInput.RawButton.RIndexTrigger);
 		bool RIndex_Up = OVRInput.GetUp (OVRInput.RawButton.RIndexTrigger);
 		bool RHand_Down = OVRInput.GetDown (OVRInput.RawButton.RHandTrigger) || OVRInput.GetDown (OVRInput.RawTouch.RTouchpad);
-		bool RHand_Hold = OVRInput.Get (OVRInput.RawButton.RHandTrigger) || OVRInput.Get (OVRInput.RawTouch.RTouchpad);
 		bool RHand_Up = OVRInput.GetUp (OVRInput.RawButton.RHandTrigger) || OVRInput.GetUp (OVRInput.RawTouch.RTouchpad);
 		bool RThumbstickUp_Down = OVRInput.GetDown (OVRInput.RawButton.RThumbstickUp) || OVRInput.GetDown (OVRInput.Button.DpadUp);
 		bool RThumbstickDown_Down = OVRInput.GetDown (OVRInput.RawButton.RThumbstickDown) || OVRInput.GetDown (OVRInput.Button.DpadDown);
@@ -130,7 +141,7 @@ public class JPFanInput : MonoBehaviour {
 			consonantIndex = currentHandPosition;
 
 			//右中指を押している場合ははまやらわの母音セットに切り替え
-			if (RHand_Hold) {
+			if (IsFirstSet == false) {
 				currentHandPosition += 5;
 				consonantIndex += 5;
 			}
@@ -154,12 +165,13 @@ public class JPFanInput : MonoBehaviour {
 			DisableVariations ();
 
 			//子音に戻す
-			if (RHand_Hold) {
-				for (int i = 0; i < 5; i++)
-					selectorTexts [i].text = jpChars [i + 5, 0];
-			} else {
-				for (int i = 0; i < 5; i++)
-					selectorTexts [i].text = jpChars [i, 0];
+			#if UNITY_STANDALONE
+			var i = IsFirstSet ? 0 : 5;
+			#elif UNITY_ANDROID
+			var i = latestIsFirstSet ? 0 : 5;
+			#endif
+			for (int j = 0; j < 5; j++) {
+				selectorTexts [j].text = jpChars [j + i, 0];
 			}
 		}
 
@@ -177,7 +189,8 @@ public class JPFanInput : MonoBehaviour {
 			}
 		}
 
-		//中指で子音のセットを切り替え
+		//子音のセットを切り替え
+		#if UNITY_STANDALONE
 		if (RHand_Up && !RIndex_Hold) {
 			for (int i = 0; i < 5; i++) {
 				selectorTexts [i].text = jpChars [i, 0];
@@ -187,10 +200,18 @@ public class JPFanInput : MonoBehaviour {
 				selectorTexts [i].text = jpChars [i + 5, 0];
 			}
 		}
+		#elif UNITY_ANDROID
+		if (OVRInput.GetDown (OVRInput.Button.DpadLeft) || OVRInput.GetDown (OVRInput.Button.DpadRight)) {
+			var i = IsFirstSet ? 5 : 0;
+			latestIsFirstSet = !IsFirstSet;
+			for (int j = 0; j < 5; j++)
+				selectorTexts [j].text = jpChars [j + i, 0];
+		}
+		#endif
 	}
 
 	//バリエーションを表示
-	public void EnableVariation (int currentPosition) {
+	void EnableVariation (int currentPosition) {
 		for (int i = 0; i < 5; i++) {
 			upperTexts [i].text = upperVariations [currentPosition, i];
 			lowerTexts [i].text = lowerVariations [currentPosition, i];
