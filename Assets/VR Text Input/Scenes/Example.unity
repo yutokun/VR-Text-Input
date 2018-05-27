@@ -173,6 +173,10 @@ Prefab:
       propertyPath: m_RootOrder
       value: 3
       objectReference: {fileID: 0}
+    - target: {fileID: 11441414, guid: 84c8b8609f9bb434eaf5248f17ff1293, type: 2}
+      propertyPath: Mode
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 84c8b8609f9bb434eaf5248f17ff1293, type: 2}
   m_IsPrefabParent: 0
@@ -396,7 +400,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!102 &436524450
 TextMesh:
   serializedVersion: 3
@@ -711,11 +715,6 @@ Prefab:
       propertyPath: onBackspace.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 1043295388}
-    - target: {fileID: 114000014045105214, guid: d53808c00439ab444b2de80da7d07a5a,
-        type: 2}
-      propertyPath: log
-      value: 
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: d53808c00439ab444b2de80da7d07a5a, type: 2}
   m_IsPrefabParent: 0

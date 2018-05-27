@@ -12,6 +12,8 @@ public class KanjiConverter : MonoBehaviour {
 	List<TextMesh> kanji = new List<TextMesh> ();
 	OVRHapticsClip hapticsClip;
 	[SerializeField, Range (0.1f, 0.2f)] float space = 0.1763988f;
+	[SerializeField] AudioSource audio;
+	[SerializeField] AudioClip click, select;
 
 	void Start () {
 		//テキスト入力欄への参照を取得
@@ -77,11 +79,15 @@ public class KanjiConverter : MonoBehaviour {
 			#endif
 			kanji [prev].color = Color.white;
 			kanji [current].color = Color.red;
+			audio.PlayOneShot (click);
 		}
 		prev = current;
 	}
 
 	IEnumerator Convert () {
+		//効果音再生
+		audio.PlayOneShot (click);
+
 		UnityWebRequest www = UnityWebRequest.Get ("http://www.google.com/transliterate?langpair=ja-Hira|ja&text=" + WWW.EscapeURL (textMesh.text));
 		yield return www.Send ();
 
@@ -128,6 +134,9 @@ public class KanjiConverter : MonoBehaviour {
 
 				//選んだ候補を入力
 				textHandler.Send (candidates [current], original.Length);
+
+				//効果音再生
+				audio.PlayOneShot (select);
 
 				//変換表示をクリア
 				foreach (var item in kanji)

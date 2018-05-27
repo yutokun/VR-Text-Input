@@ -24,6 +24,10 @@ public class JPFanInput : MonoBehaviour {
 
 	public Color baseColor = new Color (255, 255, 255), highlightColor = new Color (255, 0, 0);
 
+	//効果音
+	[SerializeField] AudioSource audio;
+	[SerializeField] AudioClip click, swipe;
+
 	string[,] jpChars = new string[10, 5] {
 		{ "あ", "い", "う", "え", "お" },
 		{ "か", "き", "く", "け", "こ" },
@@ -116,6 +120,7 @@ public class JPFanInput : MonoBehaviour {
 			#endif
 			selectorTexts [prevPosition].color = baseColor;
 			selectorTexts [currentHandPosition].color = highlightColor;
+			audio.PlayOneShot (click);
 		}
 
 		//針の位置管理
@@ -154,6 +159,9 @@ public class JPFanInput : MonoBehaviour {
 			//バリエーションを表示
 			EnableVariation (currentHandPosition);
 
+			//効果音再生
+			audio.PlayOneShot (click);
+
 		} else if (RIndex_Up) {
 			//離して文字を入力
 			if (afterVariationEntered == false) {
@@ -163,6 +171,9 @@ public class JPFanInput : MonoBehaviour {
 
 			//バリエーションを非表示
 			DisableVariations ();
+
+			//効果音再生
+			audio.PlayOneShot (click);
 
 			//子音に戻す
 			#if UNITY_STANDALONE
@@ -182,10 +193,16 @@ public class JPFanInput : MonoBehaviour {
 				//上部バリエーションの入力
 				textHandler.SendChar (upperVariations [consonantIndex, currentHandPosition]);
 				afterVariationEntered = true;
+
+				//効果音再生
+				audio.PlayOneShot (click);
 			} else if (RThumbstickDown_Down) {
 				//下部バリエーションの入力
 				textHandler.SendChar (lowerVariations [consonantIndex, currentHandPosition]);
 				afterVariationEntered = true;
+
+				//効果音再生
+				audio.PlayOneShot (click);
 			}
 		}
 
@@ -206,6 +223,9 @@ public class JPFanInput : MonoBehaviour {
 			latestIsFirstSet = !IsFirstSet;
 			for (int j = 0; j < 5; j++)
 				selectorTexts [j].text = jpChars [j + i, 0];
+
+			//効果音再生
+			audio.PlayOneShot (swipe);
 		}
 		#endif
 	}
