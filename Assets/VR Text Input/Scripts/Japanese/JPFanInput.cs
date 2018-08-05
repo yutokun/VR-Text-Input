@@ -67,17 +67,15 @@ public class JPFanInput : MonoBehaviour {
 		{ "", "", "…", "/", "" }
 	};
 
-	bool latestIsFirstSet;
-
-	bool IsFirstSet {
-		get {
-			#if UNITY_STANDALONE
-			return OVRInput.Get (OVRInput.RawButton.RHandTrigger);
-			#elif UNITY_ANDROID
-			return selectorTexts [0].text.Contains ("あ");
-			#endif
-		}
-	}
+	bool IsFirstSet
+	{
+#if UNITY_STANDALONE
+		get { return OVRInput.Get (OVRInput.RawButton.RHandTrigger); }
+#elif UNITY_ANDROID
+		get;
+		set;
+#endif
+	} = true;
 
 	void Start () {
 		//入力候補欄への参照を取得
@@ -115,9 +113,9 @@ public class JPFanInput : MonoBehaviour {
 
 		//パネルの色を変えて振動させる
 		if (kanji.isConverting == false && currentHandPosition != prevPosition) {
-			#if UNITY_STANDALONE
+#if UNITY_STANDALONE
 			OVRHaptics.RightChannel.Mix (hapticsClip);
-			#endif
+#endif
 			selectorTexts [prevPosition].color = baseColor;
 			selectorTexts [currentHandPosition].color = highlightColor;
 			audio.PlayOneShot (click);
@@ -176,11 +174,7 @@ public class JPFanInput : MonoBehaviour {
 			audio.PlayOneShot (click);
 
 			//子音に戻す
-			#if UNITY_STANDALONE
 			var i = IsFirstSet ? 0 : 5;
-			#elif UNITY_ANDROID
-			var i = latestIsFirstSet ? 0 : 5;
-			#endif
 			for (int j = 0; j < 5; j++) {
 				selectorTexts [j].text = jpChars [j + i, 0];
 			}
@@ -207,7 +201,7 @@ public class JPFanInput : MonoBehaviour {
 		}
 
 		//子音のセットを切り替え
-		#if UNITY_STANDALONE
+#if UNITY_STANDALONE
 		if (RHand_Up && !RIndex_Hold) {
 			for (int i = 0; i < 5; i++) {
 				selectorTexts [i].text = jpChars [i, 0];
@@ -217,17 +211,18 @@ public class JPFanInput : MonoBehaviour {
 				selectorTexts [i].text = jpChars [i + 5, 0];
 			}
 		}
-		#elif UNITY_ANDROID
+#elif UNITY_ANDROID
 		if (OVRInput.GetDown (OVRInput.Button.DpadLeft) || OVRInput.GetDown (OVRInput.Button.DpadRight)) {
 			var i = IsFirstSet ? 5 : 0;
-			latestIsFirstSet = !IsFirstSet;
 			for (int j = 0; j < 5; j++)
 				selectorTexts [j].text = jpChars [j + i, 0];
 
 			//効果音再生
 			audio.PlayOneShot (swipe);
+
+			IsFirstSet = !IsFirstSet;
 		}
-		#endif
+#endif
 	}
 
 	//バリエーションを表示
