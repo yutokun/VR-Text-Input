@@ -18,177 +18,17 @@ public class OvrAvatarComponent : MonoBehaviour
     public static readonly string[] LayerMaskParametersParameters = new[] { "_LayerMaskParameters0", "_LayerMaskParameters1", "_LayerMaskParameters2", "_LayerMaskParameters3", "_LayerMaskParameters4", "_LayerMaskParameters5", "_LayerMaskParameters6", "_LayerMaskParameters7", };
     public static readonly string[] LayerMaskAxisParameters = new[] { "_LayerMaskAxis0", "_LayerMaskAxis1", "_LayerMaskAxis2", "_LayerMaskAxis3", "_LayerMaskAxis4", "_LayerMaskAxis5", "_LayerMaskAxis6", "_LayerMaskAxis7", };
 
-    public SkinnedMeshRenderer RootMeshComponent;
-
     private Dictionary<Material, ovrAvatarMaterialState> materialStates = new Dictionary<Material, ovrAvatarMaterialState>();
     public List<OvrAvatarRenderComponent> RenderParts = new List<OvrAvatarRenderComponent>();
 
     private bool DrawSkeleton = false;
-    private bool IsVertexDataUpdating = false;
-    private bool IsCombiningMeshes = false;
     private bool FirstMaterialUpdate = true;
 
-    private ulong ClothingAlphaTexture = 0;
-    private Vector4 ClothingAlphaOffset;
-
-
-    // We need to copy the mesh data to manipulate it in another thread.
-    private struct MeshThreadData
-    {
-        public Color[] MeshColors;
-        public int VertexCount;
-        public bool IsDarkMaterial;
-        public bool UsesAlpha;
-    }
-
-    Thread VertexThread;
-    MeshThreadData[] ThreadData;
-
-    public void StartMeshCombining(ovrAvatarComponent component)
-    {
-        IsCombiningMeshes = true;
-        gameObject.SetActive(false);
-
-        ThreadData = new MeshThreadData[RenderParts.Count];
-        const UInt32 BODY_INDEX = 0;
-
-        for (UInt32 renderPartIndex = 0; renderPartIndex < RenderParts.Count; renderPartIndex++)
-        {
-            var renderPart = RenderParts[(int)renderPartIndex];
-            IntPtr ovrRenderPart = OvrAvatar.GetRenderPart(component, renderPartIndex);
-            var materialState = CAPI.ovrAvatarSkinnedMeshRender_GetMaterialState(ovrRenderPart);
-
-            ThreadData[renderPartIndex].VertexCount = renderPart.mesh.sharedMesh.vertexCount;
-            ThreadData[renderPartIndex].IsDarkMaterial = renderPartIndex != 0;
-
-            if (materialState.alphaMaskTextureID != 0)
-            {
-                if (renderPartIndex != BODY_INDEX)
-                {
-                    ClothingAlphaOffset = materialState.alphaMaskScaleOffset;
-                    ClothingAlphaTexture = materialState.alphaMaskTextureID;
-                }
-
-                ThreadData[renderPartIndex].UsesAlpha = true;
-            }
-
-            ThreadData[renderPartIndex].MeshColors = renderPart.mesh.sharedMesh.colors;
-        }
-
-        VertexThread = new Thread(() => UpdateVertices(ref ThreadData));
-        VertexThread.Start();
-    }
-
-    private void UpdateVertices(ref MeshThreadData[] threadData)
-    {
-        IsVertexDataUpdating = true;
-
-        foreach (var data in threadData)
-        {
-            for (int index = 0; index < data.VertexCount; index++)
-            {
-                data.MeshColors[index].a = 0.0f;
-
-                if (data.UsesAlpha)
-                {
-                    data.MeshColors[index].a = data.IsDarkMaterial ? 1.0f : 0.5f;
-                }
-
-                data.MeshColors[index].r = data.IsDarkMaterial ? 1.0f : 0.0f;
-            }
-        }
-
-        IsVertexDataUpdating = false;
-    }
-
-    public void CombineMeshes(ovrAvatarComponent component)
-    {
-        List<Transform> bones = new List<Transform>();
-        List<BoneWeight> boneWeights = new List<BoneWeight>();
-        List<CombineInstance> combineInstances = new List<CombineInstance>();
-        List<Matrix4x4> bindposes = new List<Matrix4x4>();
-        List<Color> colors = new List<Color>();
-
-        RootMeshComponent = gameObject.AddComponent<SkinnedMeshRenderer>();
-        RootMeshComponent.quality = SkinQuality.Bone4;
-        RootMeshComponent.updateWhenOffscreen = true;
-
-        int boneOffset = 0;
-
-        for (UInt32 renderPartIndex = 0; renderPartIndex < RenderParts.Count; renderPartIndex++)
-        {
-            var renderPart = RenderParts[(int)renderPartIndex];
-
-            if (RootMeshComponent.sharedMaterial == null)
-            {
-                RootMeshComponent.sharedMaterial = renderPart.mesh.sharedMaterial;
-                materialStates.Add(RootMeshComponent.sharedMaterial, new ovrAvatarMaterialState());
-
-                RootMeshComponent.sortingLayerID = renderPart.mesh.sortingLayerID;
-                RootMeshComponent.gameObject.layer = renderPart.gameObject.layer;
-            }
-
-            colors.AddRange(ThreadData[renderPartIndex].MeshColors);
-
-            foreach (BoneWeight bw in renderPart.mesh.sharedMesh.boneWeights)
-            {
-                BoneWeight bWeight = bw;
-
-                bWeight.boneIndex0 += boneOffset;
-                bWeight.boneIndex1 += boneOffset;
-                bWeight.boneIndex2 += boneOffset;
-                bWeight.boneIndex3 += boneOffset;
-
-                boneWeights.Add(bWeight);
-            }
-
-            boneOffset += renderPart.mesh.bones.Length;
-
-            foreach (Transform bone in renderPart.mesh.bones)
-            {
-                bones.Add(bone);
-            }
-
-            CombineInstance ci = new CombineInstance();
-            ci.mesh = renderPart.mesh.sharedMesh;
-            ci.transform = renderPart.mesh.transform.localToWorldMatrix;
-            combineInstances.Add(ci);
-
-            for (int b = 0; b < renderPart.mesh.bones.Length; b++)
-            {
-                bindposes.Add(renderPart.mesh.sharedMesh.bindposes[b]);
-            }
-
-            Destroy(renderPart.mesh);
-            renderPart.mesh = null;
-        }
-
-        RootMeshComponent.sharedMesh = new Mesh();
-        RootMeshComponent.sharedMesh.name = transform.name + "_combined_mesh";
-        RootMeshComponent.sharedMesh.CombineMeshes(combineInstances.ToArray(), true, true);
-
-        RootMeshComponent.bones = bones.ToArray();
-        RootMeshComponent.sharedMesh.boneWeights = boneWeights.ToArray();
-        RootMeshComponent.sharedMesh.bindposes = bindposes.ToArray();
-        RootMeshComponent.sharedMesh.colors = colors.ToArray();
-        RootMeshComponent.rootBone = bones[0];
-        RootMeshComponent.sharedMesh.RecalculateBounds();
-    }
+    public ulong ClothingAlphaTexture = 0;
+    public Vector4 ClothingAlphaOffset;
 
     public void UpdateAvatar(ovrAvatarComponent component, OvrAvatar avatar)
     {
-        if (IsCombiningMeshes)
-        {
-            if (!IsVertexDataUpdating)
-            {
-                CombineMeshes(component);
-                IsCombiningMeshes = false;
-                ThreadData = null;
-            }
-
-            return;
-        }
-
         OvrAvatar.ConvertTransform(component.transform, transform);
 
         for (UInt32 renderPartIndex = 0; renderPartIndex < component.renderPartCount; renderPartIndex++)
@@ -207,8 +47,7 @@ public class OvrAvatarComponent : MonoBehaviour
                     ((OvrAvatarSkinnedMeshRenderComponent)renderComponent).UpdateSkinnedMeshRender(this, avatar, renderPart);
                     break;
                 case ovrAvatarRenderPartType.SkinnedMeshRenderPBS:
-                    var material = RootMeshComponent != null ? RootMeshComponent.sharedMaterial : renderComponent.mesh.sharedMaterial;
-                    ((OvrAvatarSkinnedMeshRenderPBSComponent)renderComponent).UpdateSkinnedMeshRenderPBS(avatar, renderPart, material);
+                    ((OvrAvatarSkinnedMeshRenderPBSComponent)renderComponent).UpdateSkinnedMeshRenderPBS(avatar, renderPart, renderComponent.mesh.sharedMaterial);
                     break;
                 case ovrAvatarRenderPartType.ProjectorRender:
                     ((OvrAvatarProjectorRenderComponent)renderComponent).UpdateProjectorRender(this, CAPI.ovrAvatarRenderPart_GetProjectorRender(renderPart));
@@ -220,35 +59,6 @@ public class OvrAvatarComponent : MonoBehaviour
                     break;
             }
         }
-
-        // The mesh has been combined and therefore update the combined mesh "components"
-        if (RootMeshComponent != null)
-        {
-            var part_zero = OvrAvatar.GetRenderPart(component, 0);
-
-            ovrAvatarRenderPartType typeZero = CAPI.ovrAvatarRenderPart_GetType(part_zero);
-            switch (typeZero)
-            {
-                case ovrAvatarRenderPartType.SkinnedMeshRender:
-                    UpdateActive(avatar, CAPI.ovrAvatarSkinnedMeshRender_GetVisibilityMask(part_zero));
-                    bool changedMaterial = (FirstMaterialUpdate && gameObject.activeSelf) || CAPI.ovrAvatarSkinnedMeshRender_MaterialStateChanged(part_zero);
-                    if (changedMaterial)
-                    {
-                        FirstMaterialUpdate = false;
-                        ovrAvatarMaterialState materialState = CAPI.ovrAvatarSkinnedMeshRender_GetMaterialState(part_zero);
-                        UpdateAvatarMaterial(RootMeshComponent.sharedMaterial, materialState);
-                    }
-                    break;
-                case ovrAvatarRenderPartType.SkinnedMeshRenderPBS:
-                    UpdateActive(avatar, CAPI.ovrAvatarSkinnedMeshRenderPBS_GetVisibilityMask(part_zero));
-                    break;
-                case ovrAvatarRenderPartType.ProjectorRender:
-                default:
-                    break;
-            }
-        }
-
-        DebugDrawTransforms();
     }
 
     protected void UpdateActive(OvrAvatar avatar, ovrAvatarVisibilityFlags mask)
@@ -256,23 +66,6 @@ public class OvrAvatarComponent : MonoBehaviour
         bool active = avatar.ShowFirstPerson && (mask & ovrAvatarVisibilityFlags.FirstPerson) != 0;
         active |= avatar.ShowThirdPerson && (mask & ovrAvatarVisibilityFlags.ThirdPerson) != 0;
         this.gameObject.SetActive(active);
-    }
-
-    private void DebugDrawTransforms()
-    {
-        Color[] line_color = { Color.red, Color.white, Color.blue };
-        int color_index = 0;
-
-        if (DrawSkeleton && RootMeshComponent != null && RootMeshComponent.bones != null)
-        {
-            foreach (var bone in RootMeshComponent.bones)
-            {
-                if (bone.parent)
-                {
-                    Debug.DrawLine(bone.position, bone.parent.position, line_color[color_index++ % line_color.Length]);
-                }
-            }
-        }
     }
 
     public void UpdateAvatarMaterial(Material mat, ovrAvatarMaterialState matState)
@@ -349,15 +142,12 @@ public class OvrAvatarComponent : MonoBehaviour
 
     public static Texture2D GetLoadedTexture(UInt64 assetId)
     {
-        if (assetId == 0)
-        {
-            return null;
-        }
         OvrAvatarAssetTexture tex = (OvrAvatarAssetTexture)OvrAvatarSDKManager.Instance.GetAsset(assetId);
         if (tex == null)
         {
-            throw new Exception("Could not find texture for asset " + assetId);
+            return null;
         }
+
         return tex.texture;
     }
 }

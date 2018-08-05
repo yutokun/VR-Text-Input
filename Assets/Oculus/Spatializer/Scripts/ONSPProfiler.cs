@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
+using UnityEngine.Networking;
 
 
 public class ONSPProfiler : MonoBehaviour
@@ -13,10 +14,6 @@ public class ONSPProfiler : MonoBehaviour
     void Start()
     {
         Application.runInBackground = true;
-        if (profilerEnabled)
-        {
-            Debug.Log("Oculus Audio Profiler enabled.");
-        }
     }
 
     void Update()

@@ -264,26 +264,6 @@ public class OVRManager : MonoBehaviour
 		}
 	}
 
-	/// <summary>
-	/// If true, both eyes will see the same image, rendered from the center eye pose, saving performance.
-	/// </summary>
-	public bool monoscopic
-	{
-		get {
-			if (!isHmdPresent)
-				return true;
-
-			return OVRPlugin.monoscopic;
-		}
-
-		set {
-			if (!isHmdPresent)
-				return;
-
-			OVRPlugin.monoscopic = value;
-		}
-	}
-
 	[Header("Performance/Quality")]
 	/// <summary>
 	/// If true, distortion rendering work is submitted a quarter-frame early to avoid pipeline stalls and increase CPU-GPU parallelism.
@@ -296,6 +276,33 @@ public class OVRManager : MonoBehaviour
 	/// </summary>
 	[Tooltip("If true, Unity will use the optimal antialiasing level for quality/performance on the current hardware.")]
 	public bool useRecommendedMSAALevel = false;
+
+	/// <summary>
+	/// If true, both eyes will see the same image, rendered from the center eye pose, saving performance.
+	/// </summary>
+	[SerializeField]
+	[Tooltip("If true, both eyes will see the same image, rendered from the center eye pose, saving performance.")]
+	private bool _monoscopic = false;
+
+	public bool monoscopic
+	{
+		get
+		{
+			if (!isHmdPresent)
+				return _monoscopic;
+
+			return OVRPlugin.monoscopic;
+		}
+
+		set
+		{
+			if (!isHmdPresent)
+				return;
+
+			OVRPlugin.monoscopic = value;
+			_monoscopic = value;
+		}
+	}
 
 	/// <summary>
 	/// If true, dynamic resolution will be enabled
@@ -1060,6 +1067,11 @@ public class OVRManager : MonoBehaviour
 			". Switching to the recommended level.");
 
 			QualitySettings.antiAliasing = display.recommendedMSAALevel;
+		}
+
+		if (monoscopic != _monoscopic)
+		{
+			monoscopic = _monoscopic;
 		}
 
 		if (_wasHmdPresent && !isHmdPresent)

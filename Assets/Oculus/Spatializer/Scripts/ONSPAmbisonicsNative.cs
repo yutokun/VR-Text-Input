@@ -1,4 +1,4 @@
-﻿/************************************************************************************
+/************************************************************************************
 Filename    :   ONSPAmbisonicsNative.cs
 Content     :   Native interface into the Oculus Ambisonics
 Created     :   November 14, 2016

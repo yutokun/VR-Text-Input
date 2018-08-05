@@ -30,6 +30,18 @@ using UnityEngine;
 public class OVRDisplay
 {
 	/// <summary>
+	/// Contains full fov information per eye
+	/// Under Symmetric Fov mode, UpFov == DownFov and LeftFov == RightFov.
+	/// </summary>
+	public struct EyeFov
+	{
+		public float UpFov;
+		public float DownFov;
+		public float LeftFov;
+		public float RightFov;
+	}
+
+	/// <summary>
 	/// Specifies the size and field-of-view for one eye texture.
 	/// </summary>
 	public struct EyeRenderDesc
@@ -41,8 +53,16 @@ public class OVRDisplay
 
 		/// <summary>
 		/// The angle of the horizontal and vertical field of view in degrees.
+		/// For Symmetric FOV interface compatibility
+		/// Note this includes the fov angle from both sides
 		/// </summary>
 		public Vector2 fov;
+
+		/// <summary>
+		/// The full information of field of view in degrees.
+		/// When Asymmetric FOV isn't enabled, this returns the maximum fov angle
+		/// </summary>
+		public EyeFov fullFov;
 	}
 
 	/// <summary>
@@ -136,7 +156,7 @@ public class OVRDisplay
 			if (!OVRManager.isHmdPresent)
 				return Vector3.zero;
 
-			return OVRPlugin.GetNodeAcceleration(OVRPlugin.Node.None, OVRPlugin.Step.Render).FromFlippedZVector3f();
+			return OVRPlugin.GetNodeAcceleration(OVRPlugin.Node.Head, OVRPlugin.Step.Render).FromFlippedZVector3f();
 		}
 	}
 
@@ -150,7 +170,7 @@ public class OVRDisplay
             if (!OVRManager.isHmdPresent)
 				return Vector3.zero;
 
-			return OVRPlugin.GetNodeAngularAcceleration(OVRPlugin.Node.None, OVRPlugin.Step.Render).FromFlippedZVector3f() * Mathf.Rad2Deg;
+			return OVRPlugin.GetNodeAngularAcceleration(OVRPlugin.Node.Head, OVRPlugin.Step.Render).FromFlippedZVector3f() * Mathf.Rad2Deg;
         }
     }
 
@@ -164,7 +184,7 @@ public class OVRDisplay
             if (!OVRManager.isHmdPresent)
                 return Vector3.zero;
 
-			return OVRPlugin.GetNodeVelocity(OVRPlugin.Node.None, OVRPlugin.Step.Render).FromFlippedZVector3f();
+			return OVRPlugin.GetNodeVelocity(OVRPlugin.Node.Head, OVRPlugin.Step.Render).FromFlippedZVector3f();
         }
     }
 	
@@ -177,7 +197,7 @@ public class OVRDisplay
 			if (!OVRManager.isHmdPresent)
 				return Vector3.zero;
 
-			return OVRPlugin.GetNodeAngularVelocity(OVRPlugin.Node.None, OVRPlugin.Step.Render).FromFlippedZVector3f() * Mathf.Rad2Deg;
+			return OVRPlugin.GetNodeAngularVelocity(OVRPlugin.Node.Head, OVRPlugin.Step.Render).FromFlippedZVector3f() * Mathf.Rad2Deg;
 		}
 	}
 
@@ -294,12 +314,42 @@ public class OVRDisplay
 			return;
 
 		OVRPlugin.Sizei size = OVRPlugin.GetEyeTextureSize((OVRPlugin.Eye)eye);
-		OVRPlugin.Frustumf frust = OVRPlugin.GetEyeFrustum((OVRPlugin.Eye)eye);
 
-		eyeDescs[(int)eye] = new EyeRenderDesc()
+		eyeDescs[(int)eye] = new EyeRenderDesc();
+		eyeDescs[(int)eye].resolution = new Vector2(size.w, size.h);
+
+		OVRPlugin.Frustumf2 frust;
+		if (OVRPlugin.GetNodeFrustum2((OVRPlugin.Node)eye, out frust))
 		{
-			resolution = new Vector2(size.w, size.h),
-            fov = Mathf.Rad2Deg * new Vector2(frust.fovX, frust.fovY),
-		};
+			eyeDescs[(int)eye].fullFov.LeftFov = Mathf.Rad2Deg * Mathf.Atan(frust.Fov.LeftTan);
+			eyeDescs[(int)eye].fullFov.RightFov = Mathf.Rad2Deg * Mathf.Atan(frust.Fov.RightTan);
+			eyeDescs[(int)eye].fullFov.UpFov = Mathf.Rad2Deg * Mathf.Atan(frust.Fov.UpTan);
+			eyeDescs[(int)eye].fullFov.DownFov = Mathf.Rad2Deg * Mathf.Atan(frust.Fov.DownTan);
+		}
+		else
+		{
+			OVRPlugin.Frustumf frustOld = OVRPlugin.GetEyeFrustum((OVRPlugin.Eye)eye);
+			eyeDescs[(int)eye].fullFov.LeftFov = Mathf.Rad2Deg * frustOld.fovX * 0.5f;
+			eyeDescs[(int)eye].fullFov.RightFov = Mathf.Rad2Deg * frustOld.fovX * 0.5f;
+			eyeDescs[(int)eye].fullFov.UpFov = Mathf.Rad2Deg * frustOld.fovY * 0.5f;
+			eyeDescs[(int)eye].fullFov.DownFov = Mathf.Rad2Deg * frustOld.fovY * 0.5f;
+		}
+
+		// Symmetric Fov uses the maximum fov angle
+		float maxFovX = Mathf.Max(eyeDescs[(int)eye].fullFov.LeftFov, eyeDescs[(int)eye].fullFov.RightFov);
+		float maxFovY = Mathf.Max(eyeDescs[(int)eye].fullFov.UpFov, eyeDescs[(int)eye].fullFov.DownFov);
+		eyeDescs[(int)eye].fov.x = maxFovX * 2.0f;
+		eyeDescs[(int)eye].fov.y = maxFovY * 2.0f;
+
+		if (!OVRPlugin.AsymmetricFovEnabled)
+		{
+			eyeDescs[(int)eye].fullFov.LeftFov = maxFovX;
+			eyeDescs[(int)eye].fullFov.RightFov = maxFovX;
+
+			eyeDescs[(int)eye].fullFov.UpFov = maxFovY;
+			eyeDescs[(int)eye].fullFov.DownFov = maxFovY;
+		}
+
+
 	}
 }

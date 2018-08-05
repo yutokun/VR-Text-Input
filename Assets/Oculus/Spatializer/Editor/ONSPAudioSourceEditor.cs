@@ -1,4 +1,4 @@
-﻿/************************************************************************************
+/************************************************************************************
 
 Filename    :   OculusSpatializerUserParamsEditor.cs
 Content     :   This script adds editor functionality to OculusSpatializerUserParams script.

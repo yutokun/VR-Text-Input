@@ -24,7 +24,7 @@ public class OvrAvatarSkinnedMeshRenderComponent : OvrAvatarRenderComponent
         ovrAvatarTransform localTransform = CAPI.ovrAvatarSkinnedMeshRender_GetTransform(renderPart);
         UpdateSkinnedMesh(avatar, bones, localTransform, visibilityMask, renderPart);
 
-        UpdateMeshMaterial(visibilityMask, mesh == null ? component.RootMeshComponent : mesh);
+        UpdateMeshMaterial(visibilityMask, mesh);
         bool isActive = this.gameObject.activeSelf;
 
         if( mesh != null )

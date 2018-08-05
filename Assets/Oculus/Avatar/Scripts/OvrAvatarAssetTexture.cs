@@ -13,6 +13,17 @@ public class OvrAvatarAssetTexture : OvrAvatarAsset {
         TextureFormat format;
         IntPtr textureData = textureAssetData.textureData;
         int textureDataSize = (int)textureAssetData.textureDataSize;
+
+        AvatarLogger.Log(
+            "OvrAvatarAssetTexture - " 
+            + _assetId 
+            + ": " 
+            + textureAssetData.format.ToString()
+            + " "  
+            + textureAssetData.sizeX
+            + "x"
+            + textureAssetData.sizeY);
+
         switch (textureAssetData.format)
         {
             case ovrAvatarTextureFormat.RGB24:

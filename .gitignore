@@ -48,6 +48,9 @@ Assets/Enhanced Hierarchy/
 Assets/Enhanced Hierarchy.meta
 .vscode/
 *.apk
+*.keystore
+*OculusPlatformSettings.asset
+*OvrAvatarSettings.asset
 
 *.log #log files, for some plugins
 *.pyc #python bytecode cache, for some plugins.

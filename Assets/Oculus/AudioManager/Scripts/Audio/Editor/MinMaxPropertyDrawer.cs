@@ -1,4 +1,4 @@
-﻿using UnityEditor;
+using UnityEditor;
 using UnityEngine;
 
 /*
@@ -52,7 +52,7 @@ public class MinMaxPropertyDrawer : PropertyDrawer {
 		}
 		float minValue = min.floatValue;
 		float maxValue = max.floatValue;
-		EditorGUI.MinMaxSlider( sliderPosition, GUIContent.none, ref minValue, ref maxValue, minMax.min, minMax.max );
+		EditorGUI.MinMaxSlider( GUIContent.none, sliderPosition, ref minValue, ref maxValue, minMax.min, minMax.max );
 		// round to readable values
 		min.floatValue = Mathf.Round( minValue / 0.01f ) * 0.01f;
 		max.floatValue = Mathf.Round( maxValue / 0.01f ) * 0.01f;

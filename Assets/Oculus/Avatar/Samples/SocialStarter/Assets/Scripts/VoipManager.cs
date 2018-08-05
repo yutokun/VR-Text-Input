@@ -17,10 +17,10 @@ public class VoipManager
     public void ConnectTo(ulong userID)
     {
         // ID comparison is used to decide who initiates and who gets the Callback
-        if (PlatformManager.MyID < userID)
+        if (SocialPlatformManager.MyID < userID)
         {
             Voip.Start(userID);
-            PlatformManager.LogOutput("Voip connect to " + userID);
+            SocialPlatformManager.LogOutput("Voip connect to " + userID);
         }
     }
 
@@ -31,7 +31,7 @@ public class VoipManager
         {
             Voip.Stop(userID);
 
-            RemotePlayer remote = PlatformManager.GetRemoteUser(userID);
+            RemotePlayer remote = SocialPlatformManager.GetRemoteUser(userID);
             if (remote != null)
             {
                 remote.voipConnectionState = PeerConnectionState.Unknown;
@@ -41,31 +41,31 @@ public class VoipManager
 
     void VoipConnectRequestCallback(Message<NetworkingPeer> msg)
     {
-       PlatformManager.LogOutput("Voip request from " + msg.Data.ID);
+        SocialPlatformManager.LogOutput("Voip request from " + msg.Data.ID);
 
-       RemotePlayer remote = PlatformManager.GetRemoteUser(msg.Data.ID);
-       if (remote != null)
-       {
-            PlatformManager.LogOutput("Voip request accepted from " + msg.Data.ID);
+        RemotePlayer remote = SocialPlatformManager.GetRemoteUser(msg.Data.ID);
+        if (remote != null)
+        {
+            SocialPlatformManager.LogOutput("Voip request accepted from " + msg.Data.ID);
             Voip.Accept(msg.Data.ID);
         }
     }
 
     void VoipStateChangedCallback(Message<NetworkingPeer> msg)
     {
-        PlatformManager.LogOutput("Voip state to " + msg.Data.ID + " changed to  " + msg.Data.State);
+        SocialPlatformManager.LogOutput("Voip state to " + msg.Data.ID + " changed to  " + msg.Data.State);
 
-        RemotePlayer remote = PlatformManager.GetRemoteUser(msg.Data.ID);
+        RemotePlayer remote = SocialPlatformManager.GetRemoteUser(msg.Data.ID);
         if (remote != null)
         {
             remote.voipConnectionState = msg.Data.State;
 
             // ID comparison is used to decide who initiates and who gets the Callback
-            if (msg.Data.State == PeerConnectionState.Timeout && PlatformManager.MyID < msg.Data.ID)
+            if (msg.Data.State == PeerConnectionState.Timeout && SocialPlatformManager.MyID < msg.Data.ID)
             {
-                    // keep trying until hangup!
-                    Voip.Start(msg.Data.ID);
-                    PlatformManager.LogOutput("Voip re-connect to " + msg.Data.ID);
+                // keep trying until hangup!
+                Voip.Start(msg.Data.ID);
+                SocialPlatformManager.LogOutput("Voip re-connect to " + msg.Data.ID);
             }
         }
     }

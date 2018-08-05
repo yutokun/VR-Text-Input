@@ -1,4 +1,4 @@
-﻿/************************************************************************************
+/************************************************************************************
 Filename    :   ONSPReflectionZone.cs
 Content     :   Add reflection zone volumes to set reflection parameters via snapshots.
 Created     :   September 8, 2016

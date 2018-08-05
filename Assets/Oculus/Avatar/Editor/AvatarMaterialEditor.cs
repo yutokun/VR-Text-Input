@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEditor;
 using NUnit.Framework;
 using System.Linq;
@@ -14,9 +14,9 @@ public class AvatarMaterialEditor : MaterialEditor {
     private const string ParallaxPrefix = "PARALLAX";
     private const string RoughnessPrefix = "ROUGHNESS";
     private const string LayerKeywordPrefix = "LAYERS_";
-	private const string AlphaMaskUniform = "_AlphaMask";
+    private const string AlphaMaskUniform = "_AlphaMask";
     private const string DarkMultUniform = "_DarkMultiplier";
-	private const string BaseColorUniform = "_BaseColor";
+    private const string BaseColorUniform = "_BaseColor";
     private const string BaseMaskTypeUniform = "_BaseMaskType";
     private const string BaseMaskParametersUniform = "_BaseMaskParameters";
     private const string BaseMaskAxisUniform = "_BaseMaskAxis";
@@ -312,9 +312,9 @@ public class AvatarMaterialEditor : MaterialEditor {
 
         EditorGUILayout.LabelField("Global material properties");
         EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-		TextureField("AlphaMask", material, AlphaMaskUniform);
+        TextureField("AlphaMask", material, AlphaMaskUniform);
         AvatarMaterialEditorGUILayout.ColorField("DarkMultiplier", material, DarkMultUniform);
-		AvatarMaterialEditorGUILayout.ColorField("BaseColor", material, BaseColorUniform);
+        AvatarMaterialEditorGUILayout.ColorField("BaseColor", material, BaseColorUniform);
         bool normalMapEnabled = AvatarMaterialEditorGUILayout.KeywordToggle("Normal map enabled", material, NormalMapPrefix);
         if (normalMapEnabled)
         {
@@ -524,7 +524,7 @@ public class AvatarMaterialEditor : MaterialEditor {
         CopyAttributes(previewMaterial, layerIndex, 0);
         SetLayerCount(previewMaterial, 1);
         previewMaterial.SetVector(DarkMultUniform, new Vector4(0.6f, 0.6f, 0.6f, 1.0f));
-		previewMaterial.SetVector(BaseColorUniform, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+        previewMaterial.SetVector(BaseColorUniform, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
         previewMaterial.SetTexture(AlphaMaskUniform, EditorGUIUtility.whiteTexture);
         return previewMaterial;
     }

@@ -9,10 +9,11 @@ using Oculus.Platform.Models;
 // frequency.
 public class P2PManager
 {
-    // update packet identifier
-    private static readonly byte UPDATE_PACKET = 1;
-    private static readonly int POSITION_DATA_LENGTH = 41;
-    private static readonly float HEIGHT_OFFSET = 0.65f;
+    // packet header is a message type byte
+    private enum MessageType : byte
+    {
+        Update = 1,
+    };
 
     public P2PManager()
     {
@@ -25,10 +26,10 @@ public class P2PManager
     public void ConnectTo(ulong userID)
     {
         // ID comparison is used to decide who calls Connect and who calls Accept
-        if (PlatformManager.MyID < userID)
+        if (SocialPlatformManager.MyID < userID)
         {
             Net.Connect(userID);
-            PlatformManager.LogOutput("P2P connect to " + userID);
+            SocialPlatformManager.LogOutput("P2P connect to " + userID);
         }
     }
 
@@ -38,7 +39,7 @@ public class P2PManager
         {
             Net.Close(userID);
 
-            RemotePlayer remote = PlatformManager.GetRemoteUser(userID);
+            RemotePlayer remote = SocialPlatformManager.GetRemoteUser(userID);
             if (remote != null)
             {
                 remote.p2pConnectionState = PeerConnectionState.Unknown;
@@ -48,84 +49,68 @@ public class P2PManager
 
     void PeerConnectRequestCallback(Message<NetworkingPeer> msg)
     {
-        PlatformManager.LogOutput("P2P request from " + msg.Data.ID);
+        SocialPlatformManager.LogOutput("P2P request from " + msg.Data.ID);
 
-        RemotePlayer remote = PlatformManager.GetRemoteUser(msg.Data.ID);
+        RemotePlayer remote = SocialPlatformManager.GetRemoteUser(msg.Data.ID);
         if (remote != null)
         {
-            PlatformManager.LogOutput("P2P request accepted from " + msg.Data.ID);
+            SocialPlatformManager.LogOutput("P2P request accepted from " + msg.Data.ID);
             Net.Accept(msg.Data.ID);
         }
     }
 
     void ConnectionStateChangedCallback(Message<NetworkingPeer> msg)
     {
-        PlatformManager.LogOutput("P2P state to " + msg.Data.ID + " changed to  " + msg.Data.State);
+        SocialPlatformManager.LogOutput("P2P state to " + msg.Data.ID + " changed to  " + msg.Data.State);
 
-        RemotePlayer remote = PlatformManager.GetRemoteUser(msg.Data.ID);
+        RemotePlayer remote = SocialPlatformManager.GetRemoteUser(msg.Data.ID);
         if (remote != null)
         {
             remote.p2pConnectionState = msg.Data.State;
 
             if (msg.Data.State == PeerConnectionState.Timeout &&
                 // ID comparison is used to decide who calls Connect and who calls Accept
-                PlatformManager.MyID < msg.Data.ID)
+                SocialPlatformManager.MyID < msg.Data.ID)
             {
                 // keep trying until hangup!
                 Net.Connect(msg.Data.ID);
-                PlatformManager.LogOutput("P2P re-connect to " + msg.Data.ID);
+                SocialPlatformManager.LogOutput("P2P re-connect to " + msg.Data.ID);
             }
         }
     }
 
     #endregion
 
-    #region Send Update
-
+    #region Message Sending
+    
     public void SendAvatarUpdate(ulong userID, Transform bodyTransform, UInt32 sequence, byte[] avatarPacket)
     {
-        byte[] sendAvatarBuffer = new byte[avatarPacket.Length + POSITION_DATA_LENGTH];
+        const int UPDATE_DATA_LENGTH = 41;
+        byte[] sendBuffer = new byte[avatarPacket.Length + UPDATE_DATA_LENGTH];
 
-        sendAvatarBuffer[0] = UPDATE_PACKET;
-        int offset = 1;
+        int offset = 0;
+        PackByte((byte)MessageType.Update, sendBuffer, ref offset);
 
-        PackULong(PlatformManager.MyID, sendAvatarBuffer, ref offset);
+        PackULong(SocialPlatformManager.MyID, sendBuffer, ref offset);
 
-        PackFloat(bodyTransform.localPosition.x, sendAvatarBuffer, ref offset);
-        PackFloat(bodyTransform.localPosition.y, sendAvatarBuffer, ref offset);
-        PackFloat(bodyTransform.localPosition.z, sendAvatarBuffer, ref offset);
-        PackFloat(bodyTransform.localRotation.x, sendAvatarBuffer, ref offset);
-        PackFloat(bodyTransform.localRotation.y, sendAvatarBuffer, ref offset);
-        PackFloat(bodyTransform.localRotation.z, sendAvatarBuffer, ref offset);
-        PackFloat(bodyTransform.localRotation.w, sendAvatarBuffer, ref offset);
+        PackFloat(bodyTransform.localPosition.x, sendBuffer, ref offset);
+        PackFloat(bodyTransform.localPosition.y, sendBuffer, ref offset);
+        PackFloat(bodyTransform.localPosition.z, sendBuffer, ref offset);
+        PackFloat(bodyTransform.localRotation.x, sendBuffer, ref offset);
+        PackFloat(bodyTransform.localRotation.y, sendBuffer, ref offset);
+        PackFloat(bodyTransform.localRotation.z, sendBuffer, ref offset);
+        PackFloat(bodyTransform.localRotation.w, sendBuffer, ref offset);
 
-        PackUInt32(sequence, sendAvatarBuffer, ref offset);
+        PackUInt32(sequence, sendBuffer, ref offset);
 
-        Buffer.BlockCopy(avatarPacket, 0, sendAvatarBuffer, offset, avatarPacket.Length);
-        Net.SendPacket(userID, sendAvatarBuffer, SendPolicy.Unreliable);
+        Debug.Assert(offset == UPDATE_DATA_LENGTH);
+
+        Buffer.BlockCopy(avatarPacket, 0, sendBuffer, offset, avatarPacket.Length);
+        Net.SendPacket(userID, sendBuffer, SendPolicy.Unreliable);
     }
-
-    void PackFloat(float f, byte[] buf, ref int offset)
-    {
-        Buffer.BlockCopy(BitConverter.GetBytes(f), 0, buf, offset, sizeof(float));
-        offset = offset + sizeof(float);
-    }
-
-    void PackULong(ulong u, byte[] buf, ref int offset)
-    {
-        Buffer.BlockCopy(BitConverter.GetBytes(u), 0, buf, offset, sizeof(ulong));
-        offset = offset + sizeof(ulong);
-    }
-
-    void PackUInt32(UInt32 u, byte[] buf, ref int offset)
-    {
-        Buffer.BlockCopy(BitConverter.GetBytes(u), 0, buf, offset, sizeof(UInt32));
-        offset = offset + sizeof(UInt32);
-    }
-
     #endregion
 
-    #region Receive Update
+    #region Message Receiving
 
     public void GetRemotePackets()
     {
@@ -133,50 +118,113 @@ public class P2PManager
 
         while ((packet = Net.ReadPacket()) != null)
         {
-            byte[] receiveAvatarBuffer = new byte[packet.Size];
-            packet.ReadBytes(receiveAvatarBuffer);
+            byte[] receiveBuffer = new byte[packet.Size];
+            packet.ReadBytes(receiveBuffer);
 
-            if (receiveAvatarBuffer[0] != UPDATE_PACKET)
+            int offset = 0;
+            MessageType messageType = (MessageType)ReadByte(receiveBuffer, ref offset);
+
+            ulong remoteUserID = ReadULong(receiveBuffer, ref offset);
+            RemotePlayer remote = SocialPlatformManager.GetRemoteUser(remoteUserID);
+            if (remote == null)
             {
-                PlatformManager.LogOutput("Invalid packet type: " + packet.Size);
+                SocialPlatformManager.LogOutput("Unknown remote player: " + remoteUserID);
                 continue;
             }
-            processAvatarPacket(ref receiveAvatarBuffer);
+
+            if (messageType == MessageType.Update)
+            {
+                processAvatarPacket(remote, ref receiveBuffer, ref offset);
+            }
+            else
+            {
+                SocialPlatformManager.LogOutput("Invalid packet type: " + packet.Size);
+                continue;
+            }
+
         }
     }
-
-    public void processAvatarPacket(ref byte[] packet)
+    
+    public void processAvatarPacket(RemotePlayer remote, ref byte[] packet, ref int offset)
     {
-        ulong remoteUserID = 0;
+        if (remote == null)
+            return;
 
-        remoteUserID = BitConverter.ToUInt64(packet, 1);
+        remote.receivedBodyPositionPrior = remote.receivedBodyPosition;
+        remote.receivedBodyPosition.x = ReadFloat(packet, ref offset);
+        remote.receivedBodyPosition.y = ReadFloat(packet, ref offset);
+        remote.receivedBodyPosition.z = ReadFloat(packet, ref offset);
 
-        RemotePlayer remote = PlatformManager.GetRemoteUser(remoteUserID);
-        if (remote != null)
-        {
-            remote.receivedBodyPositionPrior = remote.receivedBodyPosition;
-            remote.receivedBodyPosition.x = BitConverter.ToSingle(packet, 9);
-            remote.receivedBodyPosition.y = BitConverter.ToSingle(packet, 13) + HEIGHT_OFFSET;
-            remote.receivedBodyPosition.z = BitConverter.ToSingle(packet, 17);
+        remote.receivedBodyRotationPrior = remote.receivedBodyRotation;
+        remote.receivedBodyRotation.x = ReadFloat(packet, ref offset);
+        remote.receivedBodyRotation.y = ReadFloat(packet, ref offset);
+        remote.receivedBodyRotation.z = ReadFloat(packet, ref offset);
+        remote.receivedBodyRotation.w = ReadFloat(packet, ref offset);
+        
+        remote.RemoteAvatar.transform.localPosition = remote.receivedBodyPosition;
+        remote.RemoteAvatar.transform.localRotation = remote.receivedBodyRotation;
 
-            remote.receivedBodyRotationPrior = remote.receivedBodyRotation;
-            remote.receivedBodyRotation.x = BitConverter.ToSingle(packet, 21);
-            remote.receivedBodyRotation.y = BitConverter.ToSingle (packet, 25);
-            remote.receivedBodyRotation.z = BitConverter.ToSingle(packet, 29);
-            remote.receivedBodyRotation.w = BitConverter.ToSingle (packet, 33);
+        // forward the remaining data to the avatar system
+        int sequence = (int)ReadUInt32(packet, ref offset);
 
-            int sequence = BitConverter.ToInt32(packet, 37);
+        byte[] remainingAvatarBuffer = new byte[packet.Length - offset];
+        Buffer.BlockCopy(packet, offset, remainingAvatarBuffer, 0, remainingAvatarBuffer.Length);
 
-            byte[] receiveAvatarBuffer = new byte[packet.Length - POSITION_DATA_LENGTH];
-            Buffer.BlockCopy(packet, POSITION_DATA_LENGTH, receiveAvatarBuffer, 0, receiveAvatarBuffer.Length);
+        IntPtr avatarPacket = Oculus.Avatar.CAPI.ovrAvatarPacket_Read((UInt32)remainingAvatarBuffer.Length, remainingAvatarBuffer);
 
-            IntPtr avatarPacket = Oculus.Avatar.CAPI.ovrAvatarPacket_Read((UInt32)receiveAvatarBuffer.Length, receiveAvatarBuffer);
+        var ovravatarPacket = new OvrAvatarPacket { ovrNativePacket = avatarPacket };
+        remote.RemoteAvatar.GetComponent<OvrAvatarRemoteDriver>().QueuePacket(sequence, ovravatarPacket);
+    }
+    #endregion
 
-            remote.RemoteAvatar.GetComponent<OvrAvatarRemoteDriver>().QueuePacket(sequence, new OvrAvatarPacket { ovrNativePacket = avatarPacket });
+    #region Serialization
 
-            remote.RemoteAvatar.transform.localPosition = remote.receivedBodyPosition;
-            remote.RemoteAvatar.transform.localRotation = remote.receivedBodyRotation;
-        }
+    void PackByte(byte b, byte[] buf, ref int offset)
+    {
+        buf[offset] = b;
+        offset += sizeof(byte);
+    }
+    byte ReadByte(byte[] buf, ref int offset)
+    {
+        byte val = buf[offset];
+        offset += sizeof(byte);
+        return val;
+    }
+
+    void PackFloat(float f, byte[] buf, ref int offset)
+    {
+        Buffer.BlockCopy(BitConverter.GetBytes(f), 0, buf, offset, sizeof(float));
+        offset += sizeof(float);
+    }
+    float ReadFloat(byte[] buf, ref int offset)
+    {
+        float val = BitConverter.ToSingle(buf, offset);
+        offset += sizeof(float);
+        return val;
+    }
+
+    void PackULong(ulong u, byte[] buf, ref int offset)
+    {
+        Buffer.BlockCopy(BitConverter.GetBytes(u), 0, buf, offset, sizeof(ulong));
+        offset += sizeof(ulong);
+    }
+    ulong ReadULong(byte[] buf, ref int offset)
+    {
+        ulong val = BitConverter.ToUInt64(buf, offset);
+        offset += sizeof(ulong);
+        return val;
+    }
+
+    void PackUInt32(UInt32 u, byte[] buf, ref int offset)
+    {
+        Buffer.BlockCopy(BitConverter.GetBytes(u), 0, buf, offset, sizeof(UInt32));
+        offset += sizeof(UInt32);
+    }
+    UInt32 ReadUInt32(byte[] buf, ref int offset)
+    {
+        UInt32 val = BitConverter.ToUInt32(buf, offset);
+        offset += sizeof(UInt32);
+        return val;
     }
 
     #endregion

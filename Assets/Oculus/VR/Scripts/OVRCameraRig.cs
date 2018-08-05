@@ -178,6 +178,8 @@ public class OVRCameraRig : MonoBehaviour
 
 	public virtual void EnsureGameObjectIntegrity()
 	{
+		bool monoscopic = OVRManager.instance != null ? OVRManager.instance.monoscopic : false;
+
 		if (trackingSpace == null)
 			trackingSpace = ConfigureAnchor(null, trackingSpaceName);
 
@@ -228,16 +230,33 @@ public class OVRCameraRig : MonoBehaviour
 			_rightEyeCamera.stereoTargetEye = StereoTargetEyeMask.Right;
 		}
 
+		if (monoscopic && !OVRPlugin.EyeTextureArrayEnabled)
+		{
+			// Output to left eye only when in monoscopic mode
+			if (_centerEyeCamera.stereoTargetEye != StereoTargetEyeMask.Left)
+			{
+				_centerEyeCamera.stereoTargetEye = StereoTargetEyeMask.Left;
+			}
+		}
+		else
+		{
+			if (_centerEyeCamera.stereoTargetEye != StereoTargetEyeMask.Both)
+			{
+				_centerEyeCamera.stereoTargetEye = StereoTargetEyeMask.Both;
+			}
+		}
+
+		// disable the right eye camera when in monoscopic mode
 		if (_centerEyeCamera.enabled == usePerEyeCameras ||
 			_leftEyeCamera.enabled == !usePerEyeCameras ||
-			_rightEyeCamera.enabled == !usePerEyeCameras)
+			_rightEyeCamera.enabled == !(usePerEyeCameras && (!monoscopic || OVRPlugin.EyeTextureArrayEnabled)))
 		{
 			_skipUpdate = true;
 		}
 
 		_centerEyeCamera.enabled = !usePerEyeCameras;
 		_leftEyeCamera.enabled = usePerEyeCameras;
-		_rightEyeCamera.enabled = usePerEyeCameras;
+		_rightEyeCamera.enabled = (usePerEyeCameras && (!monoscopic || OVRPlugin.EyeTextureArrayEnabled));
 	}
 
 	protected virtual Transform ConfigureAnchor(Transform root, string name)

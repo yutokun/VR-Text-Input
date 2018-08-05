@@ -160,7 +160,7 @@ public class PlatformManager : MonoBehaviour
             helpMesh.material = riftMaterial;
         }
         
-        localAvatar.oculusUserID = myID;
+        localAvatar.oculusUserID = myID.ToString();
         localAvatar.RecordPackets = true;
         localAvatar.PacketRecorded += OnLocalAvatarPacketRecorded;
     
@@ -439,7 +439,7 @@ public class PlatformManager : MonoBehaviour
         RemotePlayer remoteUser = new RemotePlayer();
 
         remoteUser.RemoteAvatar = Instantiate(s_instance.remoteAvatarPrefab);
-        remoteUser.RemoteAvatar.oculusUserID = userID;
+        remoteUser.RemoteAvatar.oculusUserID = userID.ToString();
         remoteUser.RemoteAvatar.ShowThirdPerson = true;
         remoteUser.p2pConnectionState = PeerConnectionState.Unknown;
         remoteUser.voipConnectionState = PeerConnectionState.Unknown;

@@ -2,16 +2,20 @@ using UnityEngine;
 using UnityEditor;
 using System.IO;
 
-class OVRManifestPreprocessor 
+class OVRManifestPreprocessor
 {
-	[MenuItem("Tools/Oculus/Create store-compatible AndroidManifest.xml", false, 100000)]	
-	public static void GenerateManifestForSubmission() 
+	[MenuItem("Tools/Oculus/Create store-compatible AndroidManifest.xml", false, 100000)]
+	public static void GenerateManifestForSubmission()
 	{
-		string srcFile = Application.dataPath + "/Oculus/VR/Editor/AndroidManifest.OVRSubmission.xml";
+		var so = ScriptableObject.CreateInstance(typeof(OVRPluginUpdaterStub));
+		var script = MonoScript.FromScriptableObject(so);
+		string assetPath = AssetDatabase.GetAssetPath(script);
+		string editorDir = Directory.GetParent(assetPath).FullName;
+		string srcFile = editorDir + "/AndroidManifest.OVRSubmission.xml";
 
 		if (!File.Exists(srcFile))
 		{
-			Debug.LogError ("Cannot find Android manifest template for submission." +
+			Debug.LogError("Cannot find Android manifest template for submission." +
 				" Please delete the OVR folder and reimport the Oculus Utilities.");
 			return;
 		}
@@ -35,8 +39,8 @@ class OVRManifestPreprocessor
 	}
 
 	[MenuItem("Tools/Oculus/Remove AndroidManifest.xml")]
-	public static void RemoveAndroidManifest() 
-	{        
+	public static void RemoveAndroidManifest()
+	{
 		AssetDatabase.DeleteAsset("Assets/Plugins/Android/AndroidManifest.xml");
 		AssetDatabase.Refresh();
 	}
