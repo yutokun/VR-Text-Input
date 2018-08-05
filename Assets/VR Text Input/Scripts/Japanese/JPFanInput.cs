@@ -67,15 +67,14 @@ public class JPFanInput : MonoBehaviour {
 		{ "", "", "…", "/", "" }
 	};
 
+#if UNITY_STANDALONE
 	bool IsFirstSet
 	{
-#if UNITY_STANDALONE
 		get { return OVRInput.Get (OVRInput.RawButton.RHandTrigger); }
+	}
 #elif UNITY_ANDROID
-		get;
-		set;
+	bool IsFirstSet { get; set; } = true;
 #endif
-	} = true;
 
 	void Start () {
 		//入力候補欄への参照を取得
