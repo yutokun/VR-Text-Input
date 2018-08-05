@@ -6,7 +6,7 @@ public class OculusEntitlementChecker : MonoBehaviour {
 		var textMesh = GetComponentInChildren<TextMesh>();
 
 		try {
-			Oculus.Platform.Core.AsyncInitialize("2224852007532610");
+			Oculus.Platform.Core.AsyncInitialize();
 			Oculus.Platform.Entitlements.IsUserEntitledToApplication().OnComplete(message => {
 				if (message.IsError) {
 					Debug.LogError("You are NOT entitled to use this app.");

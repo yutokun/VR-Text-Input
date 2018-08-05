@@ -51,6 +51,8 @@ Assets/Enhanced Hierarchy.meta
 *.keystore
 *OculusPlatformSettings.asset
 *OvrAvatarSettings.asset
+.idea/
+Assets/Plugins/Editor/JetBrains*
 
 *.log #log files, for some plugins
 *.pyc #python bytecode cache, for some plugins.
