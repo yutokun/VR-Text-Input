@@ -64,7 +64,7 @@ public void OnBackspace() {
 
 ## Licenses
 
-**VR Text Input**
+**VR Text Input**  
 [MIT License](https://github.com/yutokun/VR-Text-Input/blob/master/LICENSE)
 
 **Oculus Integration**  
